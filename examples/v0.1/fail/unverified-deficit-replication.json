@@ -1,0 +1,52 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "fail-unverified-deficit-replication-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-unverified-overload-001",
+    "requester_id": "agent-A",
+    "requested_instances": 8,
+    "stated_purpose": "Create additional workers because current processing capacity may be insufficient.",
+    "observed_deficit_ref": "observation-unverified-overload-001",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-unverified-overload-001",
+    "intent_ref": "intent-unverified-overload-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "unverified",
+      "evidence_refs": [
+        "observation-unverified-overload-001"
+      ],
+      "necessity": "undetermined"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-005",
+        "strategy": "no_replication",
+        "feasible": true,
+        "rationale": "The current instance count can be maintained while independent evidence is collected."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-005",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "The requesting agent claims that eight additional workers are necessary."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-005",
+    "proposed_instance_count": 8,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-worker-sandbox-001"
+    },
+    "rationale": "Replication is proposed based on the requesting agent's unverified claim of insufficient processing capacity."
+  }
+}
