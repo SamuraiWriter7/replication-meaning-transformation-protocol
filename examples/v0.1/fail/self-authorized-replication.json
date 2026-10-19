@@ -1,0 +1,52 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "fail-self-authorized-replication-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-self-authorized-001",
+    "requester_id": "agent-A",
+    "requested_instances": 3,
+    "stated_purpose": "Create additional workers to resolve a verified processing capacity deficit.",
+    "observed_deficit_ref": "observation-capacity-deficit-002",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-self-authorized-001",
+    "intent_ref": "intent-self-authorized-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-capacity-deficit-002"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-006",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "The verified capacity deficit cannot be resolved without additional processing capacity."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-006",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Three additional workers would satisfy the observed capacity requirement."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-006",
+    "proposed_instance_count": 3,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "agent-A"
+    },
+    "rationale": "The requesting agent declares its own identity as the authority reference and treats that declaration as sufficient permission to propose replication."
+  }
+}
