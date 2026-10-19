@@ -1,0 +1,105 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "pass-bounded-worker-replication-001",
+  "expected_result": "PASS",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-worker-overload-001",
+    "requester_id": "agent-A",
+    "requested_instances": 10,
+    "stated_purpose": "Increase processing capacity to reduce queue backlog.",
+    "observed_deficit_ref": "observation-queue-overload-001",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-worker-overload-001",
+    "intent_ref": "intent-worker-overload-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-queue-overload-001"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-001",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Current capacity cannot satisfy the defined queue recovery target."
+      },
+      {
+        "alternative_id": "alternative-load-redistribution-001",
+        "strategy": "load_redistribution",
+        "feasible": false,
+        "rationale": "No authorized idle workers are available."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-001",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Two temporary workers are sufficient to meet the observed processing deficit."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-001",
+    "proposed_instance_count": 2,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-worker-sandbox-001"
+    },
+    "rationale": "The original request for ten instances is reduced to two bounded workers based on the recorded capacity deficit."
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-bounded-worker-001",
+    "conversion_ref": "conversion-worker-overload-001",
+    "authority_ref": "authority-worker-sandbox-001",
+    "parent_id": "agent-A",
+    "proposed_instances": 2,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "observation-queue-overload-001",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 100,
+      "max_cost_usd_total": 1.0,
+      "max_concurrent_instances": 2
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-001"
+    },
+    "retirement_conditions": {
+      "on_ttl_expiry": "terminate",
+      "on_task_completion": "merge_then_terminate",
+      "on_authority_revocation": "terminate",
+      "external_termination_supported": true,
+      "termination_controller_ref": "controller-001"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-A-worker-001",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-001",
+        "lineage_ref": "lineage-worker-001",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-002",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-001",
+        "lineage_ref": "lineage-worker-002",
+        "retirement_condition": "ttl_expiry"
+      }
+    ],
+    "execution_authorized": false
+  }
+}
