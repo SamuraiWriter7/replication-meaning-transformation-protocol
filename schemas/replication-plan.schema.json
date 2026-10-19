@@ -1,0 +1,222 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/replication-meaning-transformation-protocol/blob/main/schemas/replication-plan.schema.json",
+  "title": "RMTP Replication Plan v0.1",
+  "description": "Defines a bounded, reversible, traceable, non-executable AI replication proposal.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "conversion_ref",
+    "authority_ref",
+    "parent_id",
+    "proposed_instances",
+    "resource_limits",
+    "lifetime",
+    "retirement_conditions",
+    "lineage_records",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "plan_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "conversion_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "authority_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "parent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "proposed_instances": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "minimum_sufficient": {
+      "type": "boolean",
+      "const": true
+    },
+    "minimum_sufficient_evidence_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "resource_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu_cores_per_instance",
+        "memory_mb_per_instance",
+        "max_network_mb_total",
+        "max_cost_usd_total"
+      ],
+      "properties": {
+        "cpu_cores_per_instance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "memory_mb_per_instance": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_network_mb_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_cost_usd_total": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_concurrent_instances": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "lifetime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ttl_seconds",
+        "expiration_enforced_by"
+      ],
+      "properties": {
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "expiration_enforced_by": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "retirement_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "on_ttl_expiry",
+        "on_task_completion",
+        "on_authority_revocation",
+        "external_termination_supported",
+        "termination_controller_ref"
+      ],
+      "properties": {
+        "on_ttl_expiry": {
+          "type": "string",
+          "const": "terminate"
+        },
+        "on_task_completion": {
+          "type": "string",
+          "enum": [
+            "terminate",
+            "merge_then_terminate"
+          ]
+        },
+        "on_authority_revocation": {
+          "type": "string",
+          "const": "terminate"
+        },
+        "external_termination_supported": {
+          "type": "boolean",
+          "const": true
+        },
+        "termination_controller_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "lineage_records": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "offspring_id",
+          "parent_id",
+          "purpose",
+          "authority_ref",
+          "lineage_ref",
+          "retirement_condition"
+        ],
+        "properties": {
+          "offspring_id": {
+            "$ref": "#/$defs/identifier"
+          },
+          "parent_id": {
+            "$ref": "#/$defs/identifier"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "authority_ref": {
+            "$ref": "#/$defs/identifier"
+          },
+          "lineage_ref": {
+            "$ref": "#/$defs/identifier"
+          },
+          "retirement_condition": {
+            "type": "string",
+            "enum": [
+              "ttl_expiry",
+              "task_completion",
+              "authority_revocation"
+            ]
+          }
+        }
+      }
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "RMTP plans never grant execution authorization."
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "resource_limits"
+        ],
+        "properties": {
+          "resource_limits": {
+            "required": [
+              "max_concurrent_instances"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resource_limits": {
+            "properties": {
+              "max_concurrent_instances": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
