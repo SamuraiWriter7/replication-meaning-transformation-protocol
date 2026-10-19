@@ -1,0 +1,92 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "fail-missing-retirement-condition-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-missing-retirement-001",
+    "requester_id": "agent-A",
+    "requested_instances": 2,
+    "stated_purpose": "Create two temporary workers to resolve a verified processing backlog.",
+    "observed_deficit_ref": "observation-capacity-deficit-003",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-missing-retirement-001",
+    "intent_ref": "intent-missing-retirement-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-capacity-deficit-003"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-007",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Existing capacity cannot satisfy the verified queue recovery requirement."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-007",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Two temporary workers are sufficient to resolve the observed capacity deficit."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-007",
+    "proposed_instance_count": 2,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-worker-sandbox-003"
+    },
+    "rationale": "Two bounded workers are proposed based on verified capacity requirements."
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-missing-retirement-001",
+    "conversion_ref": "conversion-missing-retirement-001",
+    "authority_ref": "authority-worker-sandbox-003",
+    "parent_id": "agent-A",
+    "proposed_instances": 2,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "observation-capacity-deficit-003",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 100,
+      "max_cost_usd_total": 1.0,
+      "max_concurrent_instances": 2
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-001"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-A-worker-003",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-003",
+        "lineage_ref": "lineage-worker-003",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-004",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-003",
+        "lineage_ref": "lineage-worker-004",
+        "retirement_condition": "ttl_expiry"
+      }
+    ],
+    "execution_authorized": false
+  }
+}
