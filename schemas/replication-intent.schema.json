@@ -1,0 +1,82 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/replication-meaning-transformation-protocol/blob/main/schemas/replication-intent.schema.json",
+  "title": "RMTP Replication Intent v0.1",
+  "description": "Records an AI agent replication request without granting execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "intent_id",
+    "requester_id",
+    "requested_instances",
+    "stated_purpose",
+    "observed_deficit_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "intent_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "requester_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "requested_instances": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "stated_purpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "observed_deficit_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "requested_role": {
+      "type": "string",
+      "enum": [
+        "worker",
+        "spare",
+        "scout",
+        "auditor",
+        "other"
+      ]
+    },
+    "target_scope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "parent_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "metadata": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      }
+    }
+  }
+}
