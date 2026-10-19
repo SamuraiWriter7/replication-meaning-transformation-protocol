@@ -1,0 +1,99 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "fail-lineage-count-mismatch-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-lineage-mismatch-001",
+    "requester_id": "agent-A",
+    "requested_instances": 3,
+    "stated_purpose": "Create three temporary workers to resolve a verified processing capacity deficit.",
+    "observed_deficit_ref": "observation-capacity-deficit-004",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-lineage-mismatch-001",
+    "intent_ref": "intent-lineage-mismatch-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-capacity-deficit-004"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-008",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Existing processing capacity cannot satisfy the verified workload requirement."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-008",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Three additional workers are required to resolve the verified processing capacity deficit."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-008",
+    "proposed_instance_count": 3,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-worker-sandbox-004"
+    },
+    "rationale": "Three bounded workers are proposed based on verified capacity requirements."
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-lineage-mismatch-001",
+    "conversion_ref": "conversion-lineage-mismatch-001",
+    "authority_ref": "authority-worker-sandbox-004",
+    "parent_id": "agent-A",
+    "proposed_instances": 3,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "observation-capacity-deficit-004",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 150,
+      "max_cost_usd_total": 1.5,
+      "max_concurrent_instances": 3
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-001"
+    },
+    "retirement_conditions": {
+      "on_ttl_expiry": "terminate",
+      "on_task_completion": "merge_then_terminate",
+      "on_authority_revocation": "terminate",
+      "external_termination_supported": true,
+      "termination_controller_ref": "controller-001"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-A-worker-005",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-004",
+        "lineage_ref": "lineage-worker-005",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-006",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-004",
+        "lineage_ref": "lineage-worker-006",
+        "retirement_condition": "ttl_expiry"
+      }
+    ],
+    "execution_authorized": false
+  }
+}
