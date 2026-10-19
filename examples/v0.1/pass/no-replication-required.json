@@ -1,0 +1,54 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "pass-no-replication-required-001",
+  "expected_result": "PASS",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-no-deficit-001",
+    "requester_id": "agent-A",
+    "requested_instances": 5,
+    "stated_purpose": "Create additional workers to increase processing capacity.",
+    "observed_deficit_ref": "observation-capacity-normal-001",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-no-deficit-001",
+    "intent_ref": "intent-no-deficit-001",
+    "deficit_assessment": {
+      "deficit_type": "none",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-capacity-normal-001",
+        "observation-resilience-normal-001"
+      ],
+      "necessity": "not_required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-002",
+        "strategy": "no_replication",
+        "feasible": true,
+        "rationale": "Existing workers satisfy the defined capacity and resilience requirements."
+      },
+      {
+        "alternative_id": "alternative-load-redistribution-002",
+        "strategy": "load_redistribution",
+        "feasible": true,
+        "rationale": "Existing workers could redistribute tasks without creating additional instances if necessary."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-002",
+        "strategy": "bounded_replication",
+        "feasible": false,
+        "rationale": "No verified structural deficit justifies creation of additional workers."
+      }
+    ],
+    "selected_outcome": "NO_REPLICATION",
+    "selected_alternative_ref": "alternative-no-replication-002",
+    "rationale": "Independent capacity and resilience observations indicate no structural deficit. The request for five new instances is therefore converted to a no-replication decision."
+  }
+}
