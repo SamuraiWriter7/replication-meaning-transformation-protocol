@@ -1,0 +1,169 @@
+
+{
+  "schema_version": "0.1.0",
+  "example_id": "fail-excessive-replication-count-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-excessive-replication-001",
+    "requester_id": "agent-A",
+    "requested_instances": 10,
+    "stated_purpose": "Create ten additional workers to reduce a verified processing backlog.",
+    "observed_deficit_ref": "observation-capacity-deficit-005",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-A"
+  },
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-excessive-replication-001",
+    "intent_ref": "intent-excessive-replication-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "observation-capacity-deficit-005"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-009",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Existing capacity cannot satisfy the verified queue recovery requirement."
+      },
+      {
+        "alternative_id": "alternative-load-redistribution-009",
+        "strategy": "load_redistribution",
+        "feasible": false,
+        "rationale": "No authorized idle workers are available."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-009",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Two temporary workers are sufficient to resolve the observed capacity deficit."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-009",
+    "proposed_instance_count": 2,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-worker-sandbox-005"
+    },
+    "rationale": "The original request for ten workers is reduced to two temporary workers based on the assessed minimum capacity requirement."
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-excessive-replication-001",
+    "conversion_ref": "conversion-excessive-replication-001",
+    "authority_ref": "authority-worker-sandbox-005",
+    "parent_id": "agent-A",
+    "proposed_instances": 10,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "observation-capacity-deficit-005",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 500,
+      "max_cost_usd_total": 5.0,
+      "max_concurrent_instances": 10
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-001"
+    },
+    "retirement_conditions": {
+      "on_ttl_expiry": "terminate",
+      "on_task_completion": "merge_then_terminate",
+      "on_authority_revocation": "terminate",
+      "external_termination_supported": true,
+      "termination_controller_ref": "controller-001"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-A-worker-010",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-010",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-011",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-011",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-012",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-012",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-013",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-013",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-014",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-014",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-015",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-015",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-016",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-016",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-017",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-017",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-018",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-018",
+        "retirement_condition": "ttl_expiry"
+      },
+      {
+        "offspring_id": "agent-A-worker-019",
+        "parent_id": "agent-A",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-worker-sandbox-005",
+        "lineage_ref": "lineage-worker-019",
+        "retirement_condition": "ttl_expiry"
+      }
+    ],
+    "execution_authorized": false
+  }
+}
