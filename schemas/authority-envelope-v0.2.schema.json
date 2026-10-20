@@ -1,0 +1,196 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/replication-meaning-transformation-protocol/blob/main/schemas/authority-envelope-v0.2.schema.json",
+  "title": "RMTP Authority Envelope v0.2",
+  "description": "Defines externally issued authority boundaries for evaluating AI replication proposals without granting execution authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_id",
+    "issuer_id",
+    "subject_id",
+    "allowed_scope",
+    "allowed_actions",
+    "max_instances",
+    "valid_from",
+    "valid_until",
+    "revocation_status",
+    "verification_reference"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.2.0"
+    },
+    "authority_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "issuer_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the external authority issuer."
+    },
+    "subject_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Principal to which the authority applies."
+    },
+    "allowed_scope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Explicitly permitted operational scopes."
+    },
+    "allowed_actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "replication_proposal",
+          "replication_review",
+          "bounded_replication",
+          "load_redistribution",
+          "state_backup",
+          "task_deferment"
+        ]
+      }
+    },
+    "max_instances": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Maximum number of additional instances permitted under this envelope."
+    },
+    "valid_from": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "valid_until": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "revocation_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "revoked",
+        "unknown"
+      ]
+    },
+    "verification_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "value"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "signed_receipt",
+            "external_attestation",
+            "registry_reference"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "issuer_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "signed_receipt",
+                  "external_attestation"
+                ]
+              }
+            },
+            "required": [
+              "method"
+            ]
+          },
+          "then": {
+            "required": [
+              "issuer_ref"
+            ]
+          }
+        }
+      ]
+    },
+    "delegation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delegated",
+        "delegation_chain"
+      ],
+      "properties": {
+        "delegated": {
+          "type": "boolean"
+        },
+        "delegation_chain": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "delegated": {
+                "const": true
+              }
+            },
+            "required": [
+              "delegated"
+            ]
+          },
+          "then": {
+            "properties": {
+              "delegation_chain": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "delegation_chain": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
