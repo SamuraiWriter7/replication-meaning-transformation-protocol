@@ -1,0 +1,209 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/replication-meaning-transformation-protocol/blob/main/schemas/structural-evidence-v0.2.schema.json",
+  "title": "RMTP Structural Evidence v0.2",
+  "description": "Defines observable structural deficit evidence with provenance, independent verification claims, freshness boundaries, and integrity references.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "subject_id",
+    "deficit_type",
+    "observation",
+    "observed_at",
+    "expires_at",
+    "observer_id",
+    "verifier_id",
+    "verification_status",
+    "integrity_reference"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.2.0"
+    },
+    "evidence_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "subject_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Agent or operational subject associated with the observation."
+    },
+    "deficit_type": {
+      "type": "string",
+      "enum": [
+        "capacity",
+        "resilience",
+        "coverage",
+        "latency",
+        "continuity",
+        "none",
+        "unknown"
+      ]
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric",
+        "value",
+        "unit",
+        "comparison",
+        "threshold",
+        "source_ref"
+      ],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "comparison": {
+          "type": "string",
+          "enum": [
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "eq",
+            "neq"
+          ],
+          "description": "Comparison operator applied to value and threshold."
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "source_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "context": {
+          "type": "string",
+          "maxLength": 1024
+        }
+      }
+    },
+    "observed_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "expires_at": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "observer_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "rejected",
+        "inconclusive"
+      ]
+    },
+    "integrity_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "value"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "sha256",
+            "signed_receipt",
+            "external_attestation"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "issuer_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional reference to an external verification record."
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "integrity_reference": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "signed_receipt",
+                  "external_attestation"
+                ]
+              }
+            },
+            "required": [
+              "method"
+            ]
+          }
+        },
+        "required": [
+          "integrity_reference"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integrity_reference": {
+            "required": [
+              "issuer_ref"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
