@@ -1,0 +1,215 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-revocation-receipt-v0.3.schema.json",
+  "title": "RMTP v0.3 Replication Revocation Receipt",
+  "description": "Records a claimed or independently verified revocation affecting bounded replicated AI agent instances. Revocation does not prove termination, retirement, or resource release.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revocation_id",
+    "authority_ref",
+    "plan_ref",
+    "affected_offspring_ids",
+    "issuer_id",
+    "effective_at",
+    "recorded_at",
+    "revocation_reason",
+    "evidence_refs",
+    "termination_required",
+    "verification_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.3.0"
+    },
+    "revocation_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier for this revocation receipt."
+    },
+    "authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the authority envelope being revoked."
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the affected replication plan."
+    },
+    "affected_offspring_ids": {
+      "type": "array",
+      "description": "Identifiers of offspring affected by this revocation. Every identifier must resolve to the referenced replication plan.",
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "issuer_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Principal or control service issuing the revocation. Actual authorization must be verified externally."
+    },
+    "effective_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp at which revocation becomes effective."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the revocation receipt was recorded."
+    },
+    "revocation_reason": {
+      "type": "string",
+      "enum": [
+        "authority_withdrawn",
+        "security_incident",
+        "policy_violation",
+        "resource_limit",
+        "task_cancelled",
+        "operator_request",
+        "other"
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Evidence references supporting the revocation event."
+    },
+    "termination_required": {
+      "type": "boolean",
+      "const": true,
+      "description": "Revocation of an active replication authority requires affected active instances to undergo termination handling. This is not proof that termination occurred."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ],
+      "description": "Verification status of the revocation record, not the termination status of affected instances."
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to independent verification of the revocation."
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "external_registry",
+        "signed_attestation",
+        "trusted_test_fixture"
+      ],
+      "description": "Method claimed for verifying the revocation. Synthetic fixtures do not prove production authenticity."
+    },
+    "controller_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "External controller responsible for coordinating termination handling."
+    },
+    "termination_request_refs": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Optional termination request references. These do not constitute termination confirmation."
+    },
+    "previous_authority_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "revoked",
+        "unknown"
+      ]
+    },
+    "resulting_authority_status": {
+      "type": "string",
+      "const": "revoked",
+      "description": "The status claimed as the result of a verified revocation."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref",
+          "verification_method",
+          "resulting_authority_status"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "enum": [
+              "unverified",
+              "inconclusive",
+              "rejected"
+            ]
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "resulting_authority_status"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "termination_request_refs"
+        ],
+        "properties": {
+          "termination_request_refs": {
+            "minItems": 1
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "controller_ref"
+        ]
+      }
+    }
+  ]
+}
