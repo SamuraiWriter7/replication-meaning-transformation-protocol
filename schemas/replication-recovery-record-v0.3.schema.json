@@ -1,0 +1,409 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-recovery-record-v0.3.schema.json",
+  "title": "RMTP v0.3 Replication Recovery Record",
+  "description": "Records externally controlled recovery handling for anomalous replicated AI agent lifecycle states. A recovery record never grants, expands, or substitutes execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "recovery_id",
+    "incident_ref",
+    "plan_ref",
+    "affected_offspring_ids",
+    "trigger",
+    "recovery_state",
+    "controller_ref",
+    "evidence_refs",
+    "recorded_at",
+    "recovery_actions",
+    "authority_expansion_requested",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.3.0"
+    },
+    "recovery_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier of the recovery record."
+    },
+    "incident_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the incident or unresolved lifecycle condition triggering recovery."
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the originating replication plan."
+    },
+    "affected_offspring_ids": {
+      "type": "array",
+      "description": "Offspring instances affected by the recovery operation. All identifiers must resolve to the referenced replication plan.",
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "termination_failed",
+        "resource_release_failed",
+        "termination_unconfirmed",
+        "heartbeat_lost",
+        "lifecycle_inconsistent",
+        "revocation_unresolved",
+        "resource_leak_detected",
+        "other"
+      ],
+      "description": "Condition responsible for initiating recovery handling."
+    },
+    "recovery_state": {
+      "type": "string",
+      "enum": [
+        "requested",
+        "in_progress",
+        "completed",
+        "failed",
+        "escalated"
+      ],
+      "description": "Declared state of the recovery process. Completion requires independently supported evidence."
+    },
+    "controller_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "External controller responsible for recovery coordination."
+    },
+    "controller_authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to an independently issued authorization permitting the specified recovery actions. Its authenticity and scope must be verified externally."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "References to evidence supporting the incident and recovery assessment.",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the recovery record was created."
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when recovery handling began."
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the declared recovery objective was completed."
+    },
+    "recovery_objective": {
+      "type": "string",
+      "enum": [
+        "restore_observability",
+        "confirm_termination",
+        "enforce_termination",
+        "release_resources",
+        "contain_instance",
+        "resolve_revocation",
+        "other"
+      ],
+      "description": "Specific objective whose completion is being assessed. Successful containment is not equivalent to complete retirement."
+    },
+    "recovery_actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/recovery_action"
+      },
+      "description": "Actions proposed, requested, or observed during recovery."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ],
+      "default": "unverified",
+      "description": "Status of independent recovery verification."
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to independent verification of the recovery outcome."
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the independent recovery verifier."
+    },
+    "recovery_result": {
+      "type": "string",
+      "enum": [
+        "objective_achieved",
+        "objective_unconfirmed",
+        "objective_failed",
+        "escalated"
+      ],
+      "description": "Result of the specified recovery objective, not necessarily the final retirement state."
+    },
+    "escalation_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the external incident escalation record."
+    },
+    "authority_expansion_requested": {
+      "type": "boolean",
+      "const": false,
+      "description": "Recovery records must not request authority expansion."
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "Recovery records never authorize execution."
+    },
+    "replacement_replication_requested": {
+      "type": "boolean",
+      "const": false,
+      "description": "Replacement replication must be handled through a separate RMTP intent and external authorization process."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "recovery_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_id",
+        "action_type",
+        "action_status",
+        "target_offspring_id"
+      ],
+      "properties": {
+        "action_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "action_type": {
+          "type": "string",
+          "enum": [
+            "recheck_state",
+            "isolate_instance",
+            "revoke_credentials",
+            "retry_termination",
+            "stop_scheduled_tasks",
+            "release_resources",
+            "notify_operator",
+            "escalate_incident",
+            "other"
+          ]
+        },
+        "action_status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "requested",
+            "in_progress",
+            "completed",
+            "failed",
+            "skipped"
+          ]
+        },
+        "target_offspring_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "controller_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action_status": {
+                "const": "completed"
+              }
+            },
+            "required": [
+              "action_status"
+            ]
+          },
+          "then": {
+            "required": [
+              "controller_ref",
+              "evidence_ref",
+              "completed_at"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "recovery_state": {
+            "const": "completed"
+          }
+        },
+        "required": [
+          "recovery_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "recovery_objective",
+          "completed_at",
+          "verification_status",
+          "verification_ref",
+          "verifier_id",
+          "recovery_result",
+          "controller_authority_ref"
+        ],
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          },
+          "recovery_result": {
+            "const": "objective_achieved"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "recovery_state": {
+            "const": "failed"
+          }
+        },
+        "required": [
+          "recovery_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "recovery_result"
+        ],
+        "properties": {
+          "recovery_result": {
+            "const": "objective_failed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "recovery_state": {
+            "const": "escalated"
+          }
+        },
+        "required": [
+          "recovery_state"
+        ]
+      },
+      "then": {
+        "required": [
+          "escalation_ref",
+          "recovery_result"
+        ],
+        "properties": {
+          "recovery_result": {
+            "const": "escalated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "recovery_state": {
+            "enum": [
+              "requested",
+              "in_progress"
+            ]
+          }
+        },
+        "required": [
+          "recovery_state"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "completed_at"
+          ]
+        },
+        "properties": {
+          "recovery_result": {
+            "const": "objective_unconfirmed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref",
+          "verifier_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "recovery_result"
+        ],
+        "properties": {
+          "recovery_result": {
+            "const": "objective_achieved"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "recovery_state": {
+            "const": "completed"
+          }
+        }
+      }
+    }
+  ]
+}
