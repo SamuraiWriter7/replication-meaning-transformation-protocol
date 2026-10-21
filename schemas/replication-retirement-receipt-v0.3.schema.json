@@ -1,0 +1,381 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-retirement-receipt-v0.3.schema.json",
+  "title": "RMTP v0.3 Replication Retirement Receipt",
+  "description": "Records termination and required resource release verification for a replicated AI agent offspring. A retirement receipt does not authorize or execute termination.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "retirement_id",
+    "plan_ref",
+    "offspring_id",
+    "termination_event_ref",
+    "termination_status",
+    "resource_release_status",
+    "retirement_status",
+    "verified_at",
+    "verifier_id",
+    "evidence_refs",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.3.0"
+    },
+    "retirement_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier of the retirement receipt."
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the originating replication plan."
+    },
+    "offspring_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the offspring whose retirement is being evaluated."
+    },
+    "termination_event_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a lifecycle termination event. The referenced event must be checked independently."
+    },
+    "termination_status": {
+      "type": "string",
+      "enum": [
+        "confirmed",
+        "unconfirmed",
+        "failed"
+      ],
+      "description": "Verification result for the offspring termination."
+    },
+    "resource_release_status": {
+      "type": "string",
+      "enum": [
+        "confirmed",
+        "pending",
+        "failed"
+      ],
+      "description": "Verification result for release of resources required by the applicable retirement policy."
+    },
+    "retirement_status": {
+      "type": "string",
+      "enum": [
+        "CONFIRMED",
+        "INCOMPLETE",
+        "FAILED"
+      ],
+      "description": "Overall retirement classification derived from termination and resource release status."
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the retirement assessment."
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the verifier evaluating retirement evidence."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "References to evidence used in the retirement assessment."
+    },
+    "termination_verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Independent verification reference supporting confirmed termination."
+    },
+    "resource_release_verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Independent verification reference supporting confirmed resource release."
+    },
+    "termination_controller_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "External controller responsible for termination."
+    },
+    "resource_controller_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "External controller responsible for resource release."
+    },
+    "resource_release_details": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/resource_release_record"
+      },
+      "description": "Individual resource release assessments. Required resource categories must be defined by the applicable external policy."
+    },
+    "retirement_reason": {
+      "type": "string",
+      "enum": [
+        "ttl_expiry",
+        "task_completion",
+        "authority_revocation",
+        "external_request",
+        "failure_recovery",
+        "other"
+      ]
+    },
+    "recovery_required": {
+      "type": "boolean",
+      "description": "Whether unresolved termination or resource release requires recovery handling."
+    },
+    "recovery_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a recovery record, when one exists."
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "A retirement receipt never grants execution authority."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "resource_release_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "resource_type",
+        "release_status",
+        "evidence_ref"
+      ],
+      "properties": {
+        "resource_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "resource_type": {
+          "type": "string",
+          "enum": [
+            "compute",
+            "memory",
+            "network",
+            "storage",
+            "credential",
+            "scheduled_task",
+            "other"
+          ]
+        },
+        "release_status": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "pending",
+            "failed"
+          ]
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "controller_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "termination_status": {
+            "const": "confirmed"
+          }
+        },
+        "required": [
+          "termination_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "termination_verification_ref",
+          "termination_controller_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resource_release_status": {
+            "const": "confirmed"
+          }
+        },
+        "required": [
+          "resource_release_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "resource_release_verification_ref",
+          "resource_controller_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retirement_status": {
+            "const": "CONFIRMED"
+          }
+        },
+        "required": [
+          "retirement_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "termination_status": {
+            "const": "confirmed"
+          },
+          "resource_release_status": {
+            "const": "confirmed"
+          },
+          "resource_release_details": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "release_status": {
+                  "const": "confirmed"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "termination_verification_ref",
+          "resource_release_verification_ref",
+          "termination_controller_ref",
+          "resource_controller_ref",
+          "resource_release_details"
+        ]
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "termination_status": {
+                "const": "failed"
+              }
+            },
+            "required": [
+              "termination_status"
+            ]
+          },
+          {
+            "properties": {
+              "resource_release_status": {
+                "const": "failed"
+              }
+            },
+            "required": [
+              "resource_release_status"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "retirement_status": {
+            "const": "FAILED"
+          },
+          "recovery_required": {
+            "const": true
+          }
+        },
+        "required": [
+          "recovery_required"
+        ]
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "termination_status": {
+                "const": "unconfirmed"
+              }
+            },
+            "required": [
+              "termination_status"
+            ]
+          },
+          {
+            "properties": {
+              "resource_release_status": {
+                "const": "pending"
+              }
+            },
+            "required": [
+              "resource_release_status"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "retirement_status": {
+            "not": {
+              "const": "CONFIRMED"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "retirement_status": {
+            "const": "INCOMPLETE"
+          }
+        },
+        "required": [
+          "retirement_status"
+        ]
+      },
+      "then": {
+        "anyOf": [
+          {
+            "properties": {
+              "termination_status": {
+                "const": "unconfirmed"
+              }
+            },
+            "required": [
+              "termination_status"
+            ]
+          },
+          {
+            "properties": {
+              "resource_release_status": {
+                "const": "pending"
+              }
+            },
+            "required": [
+              "resource_release_status"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
