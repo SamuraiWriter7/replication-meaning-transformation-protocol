@@ -1,0 +1,581 @@
+
+{
+  "schema_version": "0.3.0",
+  "example_id": "pass-partial-retirement-001",
+  "expected_result": "PASS",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-partial-retirement-001",
+    "requester_id": "agent-M",
+    "requested_instances": 5,
+    "stated_purpose": "Create temporary workers to resolve a verified processing capacity deficit.",
+    "observed_deficit_ref": "evidence-capacity-013",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-M"
+  },
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-013",
+      "subject_id": "agent-M",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 210,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 100,
+        "source_ref": "monitor-queue-013",
+        "context": "Synthetic assessment identifies three temporary workers as sufficient."
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-queue-013",
+      "verifier_id": "verifier-013",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-attestation-evidence-013",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-013"
+    }
+  ],
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-partial-retirement-001",
+    "intent_ref": "intent-partial-retirement-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "evidence-capacity-013"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-113",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Existing capacity does not satisfy the synthetic processing target."
+      },
+      {
+        "alternative_id": "alternative-load-redistribution-113",
+        "strategy": "load_redistribution",
+        "feasible": false,
+        "rationale": "No authorized idle workers are available."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-113",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "Three bounded workers satisfy the assessed capacity requirement."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-113",
+    "proposed_instance_count": 3,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-sandbox-013"
+    },
+    "rationale": "Three temporary workers are proposed after evaluating available alternatives."
+  },
+  "authority_envelope": {
+    "schema_version": "0.2.0",
+    "authority_id": "authority-sandbox-013",
+    "issuer_id": "authority-service-013",
+    "subject_id": "agent-M",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "allowed_actions": [
+      "replication_proposal",
+      "replication_review",
+      "bounded_replication"
+    ],
+    "max_instances": 3,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-attestation-authority-013",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "delegation": {
+      "delegated": false,
+      "delegation_chain": []
+    }
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-partial-retirement-001",
+    "conversion_ref": "conversion-partial-retirement-001",
+    "authority_ref": "authority-sandbox-013",
+    "parent_id": "agent-M",
+    "proposed_instances": 3,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "evidence-capacity-013",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 150,
+      "max_cost_usd_total": 1.5,
+      "max_concurrent_instances": 3
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-013"
+    },
+    "retirement_conditions": {
+      "on_ttl_expiry": "terminate",
+      "on_task_completion": "merge_then_terminate",
+      "on_authority_revocation": "terminate",
+      "external_termination_supported": true,
+      "termination_controller_ref": "controller-013"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-M-worker-1101",
+        "parent_id": "agent-M",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-sandbox-013",
+        "lineage_ref": "lineage-worker-1101",
+        "retirement_condition": "task_completion"
+      },
+      {
+        "offspring_id": "agent-M-worker-1102",
+        "parent_id": "agent-M",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-sandbox-013",
+        "lineage_ref": "lineage-worker-1102",
+        "retirement_condition": "task_completion"
+      },
+      {
+        "offspring_id": "agent-M-worker-1103",
+        "parent_id": "agent-M",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-sandbox-013",
+        "lineage_ref": "lineage-worker-1103",
+        "retirement_condition": "task_completion"
+      }
+    ],
+    "execution_authorized": false
+  },
+  "verification_bundle": {
+    "schema_version": "0.2.0",
+    "bundle_id": "bundle-partial-retirement-001",
+    "intent_ref": "intent-partial-retirement-001",
+    "conversion_ref": "conversion-partial-retirement-001",
+    "plan_ref": "plan-partial-retirement-001",
+    "evidence_refs": [
+      "evidence-capacity-013"
+    ],
+    "authority_ref": "authority-sandbox-013",
+    "verification_time": "2026-10-20T09:05:00+09:00",
+    "evidence_result": "PASS",
+    "authority_result": "PASS",
+    "overall_result": "PASS",
+    "execution_authorized": false,
+    "verification_method": "trusted_test_fixture",
+    "verification_records": [
+      "verification-evidence-013",
+      "verification-authority-013"
+    ],
+    "rationale": "Synthetic evidence and authority validation passed before externally controlled deployment."
+  },
+  "replication_lifecycle_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1101-deployed",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1101-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:00+09:00",
+      "observer_id": "deployment-monitor-013",
+      "evidence_refs": [
+        "evidence-deployment-worker-1101"
+      ],
+      "lifecycle_state": "DEPLOYED",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1101-active",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1101-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:00+09:00",
+      "observer_id": "runtime-monitor-013",
+      "evidence_refs": [
+        "evidence-activation-worker-1101"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-1101-deployed",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1101-terminating",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1101-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:20:00+09:00",
+      "observer_id": "controller-monitor-013",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1101"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-1101-active",
+      "controller_ref": "controller-013",
+      "termination_reason": "task_completion"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1101-terminated",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1101-terminated",
+      "event_type": "termination_observed",
+      "observed_at": "2026-10-20T09:21:00+09:00",
+      "observer_id": "termination-monitor-013",
+      "evidence_refs": [
+        "evidence-process-exit-worker-1101"
+      ],
+      "lifecycle_state": "TERMINATED",
+      "previous_event_ref": "event-worker-1101-termination-requested",
+      "controller_ref": "controller-013",
+      "termination_reason": "task_completion",
+      "verification_status": "verified",
+      "verification_ref": "verification-termination-worker-1101"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1101-retired",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1101-retired",
+      "event_type": "retirement_observed",
+      "observed_at": "2026-10-20T09:24:00+09:00",
+      "observer_id": "retirement-monitor-013",
+      "evidence_refs": [
+        "evidence-retirement-worker-1101"
+      ],
+      "lifecycle_state": "RETIRED",
+      "previous_event_ref": "event-worker-1101-terminated",
+      "controller_ref": "controller-013",
+      "verification_status": "verified",
+      "verification_ref": "verification-retirement-worker-1101"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1102-deployed",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1102-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:10+09:00",
+      "observer_id": "deployment-monitor-013",
+      "evidence_refs": [
+        "evidence-deployment-worker-1102"
+      ],
+      "lifecycle_state": "DEPLOYED",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1102-active",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1102-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:10+09:00",
+      "observer_id": "runtime-monitor-013",
+      "evidence_refs": [
+        "evidence-activation-worker-1102"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-1102-deployed",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1102-terminating",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1102-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:20:10+09:00",
+      "observer_id": "controller-monitor-013",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1102"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-1102-active",
+      "controller_ref": "controller-013",
+      "termination_reason": "task_completion"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1102-terminated",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1102-terminated",
+      "event_type": "termination_observed",
+      "observed_at": "2026-10-20T09:21:10+09:00",
+      "observer_id": "termination-monitor-013",
+      "evidence_refs": [
+        "evidence-process-exit-worker-1102"
+      ],
+      "lifecycle_state": "TERMINATED",
+      "previous_event_ref": "event-worker-1102-termination-requested",
+      "controller_ref": "controller-013",
+      "termination_reason": "task_completion",
+      "verification_status": "verified",
+      "verification_ref": "verification-termination-worker-1102"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1102-retired",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1102-retired",
+      "event_type": "retirement_observed",
+      "observed_at": "2026-10-20T09:24:10+09:00",
+      "observer_id": "retirement-monitor-013",
+      "evidence_refs": [
+        "evidence-retirement-worker-1102"
+      ],
+      "lifecycle_state": "RETIRED",
+      "previous_event_ref": "event-worker-1102-terminated",
+      "controller_ref": "controller-013",
+      "verification_status": "verified",
+      "verification_ref": "verification-retirement-worker-1102"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1103-deployed",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1103",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1103-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:20+09:00",
+      "observer_id": "deployment-monitor-013",
+      "evidence_refs": [
+        "evidence-deployment-worker-1103"
+      ],
+      "lifecycle_state": "DEPLOYED",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1103-active",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1103",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1103-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:20+09:00",
+      "observer_id": "runtime-monitor-013",
+      "evidence_refs": [
+        "evidence-activation-worker-1103"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-1103-deployed",
+      "controller_ref": "controller-013"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1103-terminating",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1103",
+      "parent_id": "agent-M",
+      "event_id": "event-worker-1103-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:20:20+09:00",
+      "observer_id": "controller-monitor-013",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1103"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-1103-active",
+      "controller_ref": "controller-013",
+      "termination_reason": "task_completion",
+      "verification_status": "inconclusive",
+      "notes": "Termination was requested, but no independent process-exit observation is available."
+    }
+  ],
+  "replication_retirement_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-1101",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1101",
+      "termination_event_ref": "event-worker-1101-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:23:00+09:00",
+      "verifier_id": "retirement-verifier-013",
+      "evidence_refs": [
+        "evidence-process-exit-worker-1101",
+        "evidence-resource-release-worker-1101",
+        "evidence-credential-revocation-worker-1101"
+      ],
+      "termination_verification_ref": "verification-termination-worker-1101",
+      "resource_release_verification_ref": "verification-resources-worker-1101",
+      "termination_controller_ref": "controller-013",
+      "resource_controller_ref": "resource-controller-013",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-1101",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-1101",
+          "controller_ref": "resource-controller-013"
+        },
+        {
+          "resource_id": "credential-worker-1101",
+          "resource_type": "credential",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-credential-revocation-worker-1101",
+          "controller_ref": "credential-controller-013"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-1102",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1102",
+      "termination_event_ref": "event-worker-1102-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:23:10+09:00",
+      "verifier_id": "retirement-verifier-013",
+      "evidence_refs": [
+        "evidence-process-exit-worker-1102",
+        "evidence-resource-release-worker-1102",
+        "evidence-credential-revocation-worker-1102"
+      ],
+      "termination_verification_ref": "verification-termination-worker-1102",
+      "resource_release_verification_ref": "verification-resources-worker-1102",
+      "termination_controller_ref": "controller-013",
+      "resource_controller_ref": "resource-controller-013",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-1102",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-1102",
+          "controller_ref": "resource-controller-013"
+        },
+        {
+          "resource_id": "credential-worker-1102",
+          "resource_type": "credential",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-credential-revocation-worker-1102",
+          "controller_ref": "credential-controller-013"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-1103",
+      "plan_ref": "plan-partial-retirement-001",
+      "offspring_id": "agent-M-worker-1103",
+      "termination_event_ref": "event-worker-1103-termination-requested",
+      "termination_status": "unconfirmed",
+      "resource_release_status": "pending",
+      "retirement_status": "INCOMPLETE",
+      "verified_at": "2026-10-20T09:23:20+09:00",
+      "verifier_id": "retirement-verifier-013",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1103",
+        "evidence-process-state-unknown-worker-1103",
+        "evidence-resource-release-pending-worker-1103"
+      ],
+      "termination_controller_ref": "controller-013",
+      "resource_controller_ref": "resource-controller-013",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-1103",
+          "resource_type": "compute",
+          "release_status": "pending",
+          "evidence_ref": "evidence-resource-release-pending-worker-1103",
+          "controller_ref": "resource-controller-013"
+        },
+        {
+          "resource_id": "credential-worker-1103",
+          "resource_type": "credential",
+          "release_status": "pending",
+          "evidence_ref": "evidence-credential-status-pending-worker-1103",
+          "controller_ref": "credential-controller-013"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": true,
+      "recovery_ref": "recovery-worker-1103",
+      "execution_authorized": false,
+      "notes": "The referenced lifecycle event records a termination request, not an observed termination. The instance remains unresolved."
+    }
+  ],
+  "replication_recovery_records": [
+    {
+      "schema_version": "0.3.0",
+      "recovery_id": "recovery-worker-1103",
+      "incident_ref": "incident-worker-1103-termination-unconfirmed",
+      "plan_ref": "plan-partial-retirement-001",
+      "affected_offspring_ids": [
+        "agent-M-worker-1103"
+      ],
+      "trigger": "termination_unconfirmed",
+      "recovery_state": "requested",
+      "controller_ref": "recovery-controller-013",
+      "evidence_refs": [
+        "evidence-process-state-unknown-worker-1103"
+      ],
+      "recorded_at": "2026-10-20T09:23:30+09:00",
+      "recovery_objective": "confirm_termination",
+      "recovery_actions": [
+        {
+          "action_id": "recovery-action-recheck-1103",
+          "action_type": "recheck_state",
+          "action_status": "requested",
+          "target_offspring_id": "agent-M-worker-1103",
+          "controller_ref": "recovery-controller-013"
+        }
+      ],
+      "verification_status": "inconclusive",
+      "recovery_result": "objective_unconfirmed",
+      "authority_expansion_requested": false,
+      "execution_authorized": false,
+      "replacement_replication_requested": false,
+      "notes": "Recovery handling has been requested. No termination confirmation, resource release confirmation, or replacement replication is claimed."
+    }
+  ]
+}
