@@ -1,0 +1,290 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-lifecycle-receipt-v0.3.schema.json",
+  "title": "RMTP v0.3 Replication Lifecycle Receipt",
+  "description": "Records an observed lifecycle event for a bounded replicated AI agent instance. A lifecycle receipt does not independently authorize deployment, execution, or retirement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "plan_ref",
+    "offspring_id",
+    "parent_id",
+    "event_id",
+    "event_type",
+    "observed_at",
+    "observer_id",
+    "evidence_refs",
+    "lifecycle_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.3.0"
+    },
+    "receipt_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to an existing RMTP replication plan."
+    },
+    "offspring_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the observed offspring instance."
+    },
+    "parent_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Identity of the parent agent recorded in the referenced replication plan."
+    },
+    "event_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identity of the lifecycle event within its applicable history."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "deployment_observed",
+        "activation_observed",
+        "heartbeat_observed",
+        "termination_requested",
+        "termination_observed",
+        "retirement_observed"
+      ]
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp associated with the lifecycle event."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this receipt was recorded."
+    },
+    "observer_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Observer or controller reporting the event. Identity alone does not establish independent verification."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "References to evidence supporting the lifecycle event.",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "lifecycle_state": {
+      "type": "string",
+      "enum": [
+        "DEPLOYED",
+        "ACTIVE",
+        "TERMINATING",
+        "TERMINATED",
+        "RETIRED"
+      ],
+      "description": "State claimed by this event. Actual state validity requires cross-record verification."
+    },
+    "previous_event_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional reference to the preceding lifecycle event."
+    },
+    "authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the authority associated with the applicable lifecycle operation."
+    },
+    "controller_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the external runtime controller responsible for the operation."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ],
+      "default": "unverified",
+      "description": "Declared verification status. A claim of verification must be confirmed independently."
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to independent verification evidence."
+    },
+    "termination_reason": {
+      "type": "string",
+      "enum": [
+        "ttl_expiry",
+        "task_completion",
+        "authority_revocation",
+        "external_request",
+        "failure_recovery",
+        "other"
+      ]
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "deployment_observed"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "DEPLOYED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "activation_observed"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "heartbeat_observed"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "ACTIVE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "termination_requested"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TERMINATING"
+          }
+        },
+        "required": [
+          "controller_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "termination_observed"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "TERMINATED"
+          }
+        },
+        "required": [
+          "verification_status",
+          "verification_ref",
+          "controller_ref",
+          "termination_reason"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "retirement_observed"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lifecycle_state": {
+            "const": "RETIRED"
+          }
+        },
+        "required": [
+          "verification_status",
+          "verification_ref",
+          "controller_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref"
+        ]
+      }
+    }
+  ]
+}
