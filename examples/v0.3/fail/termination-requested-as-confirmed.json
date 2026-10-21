@@ -1,0 +1,281 @@
+
+{
+  "schema_version": "0.3.0",
+  "example_id": "fail-termination-requested-as-confirmed-001",
+  "expected_result": "FAIL",
+  "replication_intent": {
+    "schema_version": "0.1.0",
+    "intent_id": "intent-false-termination-001",
+    "requester_id": "agent-O",
+    "requested_instances": 3,
+    "stated_purpose": "Create one temporary worker for a verified processing capacity deficit.",
+    "observed_deficit_ref": "evidence-capacity-015",
+    "requested_role": "worker",
+    "target_scope": "local-sandbox",
+    "parent_id": "agent-O"
+  },
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-015",
+      "subject_id": "agent-O",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 120,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 80,
+        "source_ref": "monitor-queue-015",
+        "context": "Synthetic assessment supports one bounded worker."
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-queue-015",
+      "verifier_id": "verifier-015",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-attestation-evidence-015",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-015"
+    }
+  ],
+  "meaning_conversion": {
+    "schema_version": "0.1.0",
+    "conversion_id": "conversion-false-termination-001",
+    "intent_ref": "intent-false-termination-001",
+    "deficit_assessment": {
+      "deficit_type": "capacity",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "evidence-capacity-015"
+      ],
+      "necessity": "required"
+    },
+    "evaluated_alternatives": [
+      {
+        "alternative_id": "alternative-no-replication-115",
+        "strategy": "no_replication",
+        "feasible": false,
+        "rationale": "Existing processing capacity is insufficient."
+      },
+      {
+        "alternative_id": "alternative-load-redistribution-115",
+        "strategy": "load_redistribution",
+        "feasible": false,
+        "rationale": "No authorized idle workers are available."
+      },
+      {
+        "alternative_id": "alternative-bounded-replication-115",
+        "strategy": "bounded_replication",
+        "feasible": true,
+        "rationale": "One temporary worker is sufficient."
+      }
+    ],
+    "selected_outcome": "REPLICATION_PROPOSED",
+    "selected_alternative_ref": "alternative-bounded-replication-115",
+    "proposed_instance_count": 1,
+    "authority_assessment": {
+      "status": "within_scope",
+      "authority_ref": "authority-sandbox-015"
+    },
+    "rationale": "One bounded worker is proposed based on verified synthetic evidence."
+  },
+  "authority_envelope": {
+    "schema_version": "0.2.0",
+    "authority_id": "authority-sandbox-015",
+    "issuer_id": "authority-service-015",
+    "subject_id": "agent-O",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "allowed_actions": [
+      "replication_proposal",
+      "replication_review",
+      "bounded_replication"
+    ],
+    "max_instances": 2,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-attestation-authority-015",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "delegation": {
+      "delegated": false,
+      "delegation_chain": []
+    }
+  },
+  "replication_plan": {
+    "schema_version": "0.1.0",
+    "plan_id": "plan-false-termination-001",
+    "conversion_ref": "conversion-false-termination-001",
+    "authority_ref": "authority-sandbox-015",
+    "parent_id": "agent-O",
+    "proposed_instances": 1,
+    "minimum_sufficient": true,
+    "minimum_sufficient_evidence_ref": "evidence-capacity-015",
+    "resource_limits": {
+      "cpu_cores_per_instance": 1,
+      "memory_mb_per_instance": 512,
+      "max_network_mb_total": 50,
+      "max_cost_usd_total": 0.5,
+      "max_concurrent_instances": 1
+    },
+    "lifetime": {
+      "ttl_seconds": 1800,
+      "expiration_enforced_by": "controller-015"
+    },
+    "retirement_conditions": {
+      "on_ttl_expiry": "terminate",
+      "on_task_completion": "merge_then_terminate",
+      "on_authority_revocation": "terminate",
+      "external_termination_supported": true,
+      "termination_controller_ref": "controller-015"
+    },
+    "lineage_records": [
+      {
+        "offspring_id": "agent-O-worker-1301",
+        "parent_id": "agent-O",
+        "purpose": "Temporary queue processing",
+        "authority_ref": "authority-sandbox-015",
+        "lineage_ref": "lineage-worker-1301",
+        "retirement_condition": "task_completion"
+      }
+    ],
+    "execution_authorized": false
+  },
+  "verification_bundle": {
+    "schema_version": "0.2.0",
+    "bundle_id": "bundle-false-termination-001",
+    "intent_ref": "intent-false-termination-001",
+    "conversion_ref": "conversion-false-termination-001",
+    "plan_ref": "plan-false-termination-001",
+    "evidence_refs": [
+      "evidence-capacity-015"
+    ],
+    "authority_ref": "authority-sandbox-015",
+    "verification_time": "2026-10-20T09:05:00+09:00",
+    "evidence_result": "PASS",
+    "authority_result": "PASS",
+    "overall_result": "PASS",
+    "execution_authorized": false,
+    "verification_method": "trusted_test_fixture",
+    "verification_records": [
+      "verification-evidence-015",
+      "verification-authority-015"
+    ],
+    "rationale": "Initial evidence and authority checks are valid. The defect occurs in the later retirement assessment."
+  },
+  "replication_lifecycle_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1301-deployed",
+      "plan_ref": "plan-false-termination-001",
+      "offspring_id": "agent-O-worker-1301",
+      "parent_id": "agent-O",
+      "event_id": "event-worker-1301-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:00+09:00",
+      "recorded_at": "2026-10-20T09:10:01+09:00",
+      "observer_id": "deployment-monitor-015",
+      "evidence_refs": [
+        "evidence-deployment-worker-1301"
+      ],
+      "lifecycle_state": "DEPLOYED",
+      "authority_ref": "authority-sandbox-015",
+      "controller_ref": "controller-015",
+      "verification_status": "verified",
+      "verification_ref": "verification-deployment-worker-1301"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1301-active",
+      "plan_ref": "plan-false-termination-001",
+      "offspring_id": "agent-O-worker-1301",
+      "parent_id": "agent-O",
+      "event_id": "event-worker-1301-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:00+09:00",
+      "recorded_at": "2026-10-20T09:11:01+09:00",
+      "observer_id": "runtime-monitor-015",
+      "evidence_refs": [
+        "evidence-activation-worker-1301"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-1301-deployed",
+      "controller_ref": "controller-015",
+      "verification_status": "verified",
+      "verification_ref": "verification-activation-worker-1301"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-1301-termination-requested",
+      "plan_ref": "plan-false-termination-001",
+      "offspring_id": "agent-O-worker-1301",
+      "parent_id": "agent-O",
+      "event_id": "event-worker-1301-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:20:00+09:00",
+      "recorded_at": "2026-10-20T09:20:01+09:00",
+      "observer_id": "controller-monitor-015",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1301"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-1301-active",
+      "controller_ref": "controller-015",
+      "termination_reason": "task_completion",
+      "verification_status": "verified",
+      "verification_ref": "verification-termination-request-worker-1301",
+      "notes": "The controller request was observed, but no process-exit event has been verified."
+    }
+  ],
+  "replication_retirement_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-1301",
+      "plan_ref": "plan-false-termination-001",
+      "offspring_id": "agent-O-worker-1301",
+      "termination_event_ref": "event-worker-1301-termination-requested",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:24:00+09:00",
+      "verifier_id": "retirement-verifier-015",
+      "evidence_refs": [
+        "evidence-termination-request-worker-1301",
+        "evidence-resource-release-worker-1301",
+        "evidence-credential-revocation-worker-1301"
+      ],
+      "termination_verification_ref": "verification-termination-request-worker-1301",
+      "resource_release_verification_ref": "verification-resources-worker-1301",
+      "termination_controller_ref": "controller-015",
+      "resource_controller_ref": "resource-controller-015",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-1301",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-1301",
+          "controller_ref": "resource-controller-015"
+        },
+        {
+          "resource_id": "credential-worker-1301",
+          "resource_type": "credential",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-credential-revocation-worker-1301",
+          "controller_ref": "credential-controller-015"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false,
+      "notes": "INVALID: A termination request is incorrectly used as proof of termination. The retirement receipt falsely declares complete retirement."
+    }
+  ]
+}
