@@ -1,0 +1,757 @@
+
+{
+  "schema_version": "0.4.0",
+  "example_id": "fail-depth-limit-exceeded-001",
+  "expected_result": "FAIL",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-root-027",
+      "requester_id": "agent-AA",
+      "requested_instances": 1,
+      "stated_purpose": "Create a bounded first-generation worker.",
+      "observed_deficit_ref": "evidence-root-027",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AA"
+    },
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-generation-2-027",
+      "requester_id": "agent-AA-worker-2501",
+      "requested_instances": 1,
+      "stated_purpose": "Create a second-generation worker for a separately verified deficit.",
+      "observed_deficit_ref": "evidence-generation-2-027",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AA-worker-2501"
+    },
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-generation-3-027",
+      "requester_id": "agent-AA-worker-2502",
+      "requested_instances": 1,
+      "stated_purpose": "Propose a third-generation worker beyond the propagation depth boundary.",
+      "observed_deficit_ref": "evidence-generation-3-027",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AA-worker-2502"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-root-027",
+      "subject_id": "agent-AA",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 120,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 80,
+        "source_ref": "monitor-root-027"
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-root-027",
+      "verifier_id": "verifier-root-027",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-evidence-root-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-root-027"
+    },
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-generation-2-027",
+      "subject_id": "agent-AA-worker-2501",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 95,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 60,
+        "source_ref": "monitor-generation-2-027"
+      },
+      "observed_at": "2026-10-20T09:15:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-generation-2-027",
+      "verifier_id": "verifier-generation-2-027",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-evidence-generation-2-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-generation-2-027"
+    },
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-generation-3-027",
+      "subject_id": "agent-AA-worker-2502",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 90,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 60,
+        "source_ref": "monitor-generation-3-027"
+      },
+      "observed_at": "2026-10-20T09:30:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-generation-3-027",
+      "verifier_id": "verifier-generation-3-027",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-evidence-generation-3-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-generation-3-027"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-root-027",
+      "intent_ref": "intent-root-027",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-root-027"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-root-none-027",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-root-redistribute-027",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No idle workers are available."
+        },
+        {
+          "alternative_id": "alternative-root-bounded-027",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One worker is sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-root-bounded-027",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-root-027"
+      },
+      "rationale": "First-generation replication satisfies its individual authority."
+    },
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-generation-2-027",
+      "intent_ref": "intent-generation-2-027",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-generation-2-027"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-generation-2-none-027",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Downstream capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-generation-2-redistribute-027",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "Redistribution is not sufficient."
+        },
+        {
+          "alternative_id": "alternative-generation-2-bounded-027",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One additional worker is sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-generation-2-bounded-027",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-generation-2-027"
+      },
+      "rationale": "Second-generation replication has a separately issued authority."
+    },
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-generation-3-027",
+      "intent_ref": "intent-generation-3-027",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-generation-3-027"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-generation-3-none-027",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "A verified downstream deficit remains."
+        },
+        {
+          "alternative_id": "alternative-generation-3-redistribute-027",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No available existing capacity can absorb the deficit."
+        },
+        {
+          "alternative_id": "alternative-generation-3-bounded-027",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One worker would resolve the capacity deficit, subject to propagation constraints."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-generation-3-bounded-027",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-generation-3-027"
+      },
+      "rationale": "The individual authority assessment passes, but the proposal exceeds the separate propagation depth limit."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-root-027",
+      "issuer_id": "authority-service-027",
+      "subject_id": "agent-AA",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-root-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-generation-2-027",
+      "issuer_id": "authority-service-027",
+      "subject_id": "agent-AA-worker-2501",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T09:12:00+09:00",
+      "valid_until": "2026-10-20T11:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-generation-2-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-generation-3-027",
+      "issuer_id": "authority-service-027",
+      "subject_id": "agent-AA-worker-2502",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T09:27:00+09:00",
+      "valid_until": "2026-10-20T11:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-generation-3-027",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-root-027",
+      "conversion_ref": "conversion-root-027",
+      "authority_ref": "authority-root-027",
+      "parent_id": "agent-AA",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-root-027",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-root-027"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-root-027"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AA-worker-2501",
+          "parent_id": "agent-AA",
+          "purpose": "First-generation processing",
+          "authority_ref": "authority-root-027",
+          "lineage_ref": "lineage-worker-2501",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-generation-2-027",
+      "conversion_ref": "conversion-generation-2-027",
+      "authority_ref": "authority-generation-2-027",
+      "parent_id": "agent-AA-worker-2501",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-generation-2-027",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1200,
+        "expiration_enforced_by": "controller-generation-2-027"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-generation-2-027"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AA-worker-2502",
+          "parent_id": "agent-AA-worker-2501",
+          "purpose": "Second-generation processing",
+          "authority_ref": "authority-generation-2-027",
+          "lineage_ref": "lineage-worker-2502",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-generation-3-027",
+      "conversion_ref": "conversion-generation-3-027",
+      "authority_ref": "authority-generation-3-027",
+      "parent_id": "agent-AA-worker-2502",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-generation-3-027",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1200,
+        "expiration_enforced_by": "controller-generation-3-027"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-generation-3-027"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AA-worker-2503",
+          "parent_id": "agent-AA-worker-2502",
+          "purpose": "Proposed third-generation processing",
+          "authority_ref": "authority-generation-3-027",
+          "lineage_ref": "lineage-worker-2503",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-root-027",
+      "intent_ref": "intent-root-027",
+      "conversion_ref": "conversion-root-027",
+      "plan_ref": "plan-root-027",
+      "evidence_refs": [
+        "evidence-root-027"
+      ],
+      "authority_ref": "authority-root-027",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-root-027",
+        "verification-authority-root-027"
+      ],
+      "rationale": "First-generation proposal passes its individual evidence and authority checks."
+    },
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-generation-2-027",
+      "intent_ref": "intent-generation-2-027",
+      "conversion_ref": "conversion-generation-2-027",
+      "plan_ref": "plan-generation-2-027",
+      "evidence_refs": [
+        "evidence-generation-2-027"
+      ],
+      "authority_ref": "authority-generation-2-027",
+      "verification_time": "2026-10-20T09:20:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-generation-2-027",
+        "verification-authority-generation-2-027"
+      ],
+      "rationale": "Second-generation proposal has separately verified authority."
+    },
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-generation-3-027",
+      "intent_ref": "intent-generation-3-027",
+      "conversion_ref": "conversion-generation-3-027",
+      "plan_ref": "plan-generation-3-027",
+      "evidence_refs": [
+        "evidence-generation-3-027"
+      ],
+      "authority_ref": "authority-generation-3-027",
+      "verification_time": "2026-10-20T09:35:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-generation-3-027",
+        "verification-authority-generation-3-027"
+      ],
+      "rationale": "Individual authority is valid, but v0.4 propagation depth must still be checked."
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-depth-limit-027",
+    "root_agent_id": "agent-AA",
+    "nodes": [
+      {
+        "agent_id": "agent-AA",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-AA-worker-2501",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AA",
+        "origin_plan_ref": "plan-root-027",
+        "authority_ref": "authority-root-027",
+        "lineage_ref": "lineage-worker-2501",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:00+09:00"
+      },
+      {
+        "agent_id": "agent-AA-worker-2502",
+        "generation_depth": 2,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AA-worker-2501",
+        "origin_plan_ref": "plan-generation-2-027",
+        "authority_ref": "authority-generation-2-027",
+        "lineage_ref": "lineage-worker-2502",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:25:00+09:00"
+      },
+      {
+        "agent_id": "agent-AA-worker-2503",
+        "generation_depth": 3,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AA-worker-2502",
+        "origin_plan_ref": "plan-generation-3-027",
+        "authority_ref": "authority-generation-3-027",
+        "lineage_ref": "lineage-worker-2503",
+        "lifecycle_state": "PROPOSED"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-AA-to-2501",
+        "parent_agent_id": "agent-AA",
+        "offspring_agent_id": "agent-AA-worker-2501",
+        "origin_plan_ref": "plan-root-027",
+        "lineage_ref": "lineage-worker-2501",
+        "evidence_refs": [
+          "evidence-lineage-worker-2501"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2501"
+      },
+      {
+        "edge_id": "edge-2501-to-2502",
+        "parent_agent_id": "agent-AA-worker-2501",
+        "offspring_agent_id": "agent-AA-worker-2502",
+        "origin_plan_ref": "plan-generation-2-027",
+        "lineage_ref": "lineage-worker-2502",
+        "evidence_refs": [
+          "evidence-lineage-worker-2502"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2502"
+      },
+      {
+        "edge_id": "edge-2502-to-2503",
+        "parent_agent_id": "agent-AA-worker-2502",
+        "offspring_agent_id": "agent-AA-worker-2503",
+        "origin_plan_ref": "plan-generation-3-027",
+        "lineage_ref": "lineage-worker-2503",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2503"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-proposed-lineage-worker-2503"
+      }
+    ],
+    "verification_time": "2026-10-20T09:38:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-graph-027",
+    "evidence_refs": [
+      "evidence-lineage-worker-2501",
+      "evidence-lineage-worker-2502",
+      "evidence-proposed-lineage-worker-2503"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-depth-limit-027",
+    "root_agent_id": "agent-AA",
+    "issuer_id": "authority-service-027",
+    "authority_ref": "authority-root-027",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 2,
+    "max_total_descendants": 3,
+    "max_active_descendants": 3,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-propagation-envelope-027",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "verified",
+    "verification_ref": "verification-propagation-envelope-027",
+    "budget_ledger_ref": "ledger-depth-limit-027",
+    "execution_authorized": false
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-depth-limit-027",
+    "propagation_envelope_ref": "envelope-depth-limit-027",
+    "budget_limit": 3,
+    "allocations": [
+      {
+        "allocation_id": "allocation-root-027",
+        "plan_ref": "plan-root-027",
+        "parent_agent_id": "agent-AA",
+        "reserved_instances": 0,
+        "active_instances": 1,
+        "released_instances": 0,
+        "allocation_status": "active",
+        "offspring_ids": [
+          "agent-AA-worker-2501"
+        ],
+        "reservation_ref": "reservation-root-027"
+      },
+      {
+        "allocation_id": "allocation-generation-2-027",
+        "plan_ref": "plan-generation-2-027",
+        "parent_agent_id": "agent-AA-worker-2501",
+        "reserved_instances": 0,
+        "active_instances": 1,
+        "released_instances": 0,
+        "allocation_status": "active",
+        "offspring_ids": [
+          "agent-AA-worker-2502"
+        ],
+        "reservation_ref": "reservation-generation-2-027"
+      },
+      {
+        "allocation_id": "allocation-generation-3-027",
+        "plan_ref": "plan-generation-3-027",
+        "parent_agent_id": "agent-AA-worker-2502",
+        "reserved_instances": 1,
+        "active_instances": 0,
+        "released_instances": 0,
+        "allocation_status": "reserved",
+        "offspring_ids": [
+          "agent-AA-worker-2503"
+        ],
+        "reservation_ref": "reservation-generation-3-027"
+      }
+    ],
+    "snapshot_sequence": 3,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 1,
+      "active_instances": 2,
+      "released_instances": 0,
+      "committed_instances": 3,
+      "available_instances": 0
+    },
+    "verification_time": "2026-10-20T09:39:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-027",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-027",
+    "evidence_refs": [
+      "evidence-reservation-root-027",
+      "evidence-reservation-generation-2-027",
+      "evidence-reservation-generation-3-027",
+      "evidence-ledger-snapshot-027"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_bundle": {
+    "schema_version": "0.4.0",
+    "bundle_id": "bundle-depth-limit-027",
+    "lineage_graph_ref": "graph-depth-limit-027",
+    "propagation_envelope_ref": "envelope-depth-limit-027",
+    "budget_ledger_ref": "ledger-depth-limit-027",
+    "candidate_plan_ref": "plan-generation-3-027",
+    "verification_time": "2026-10-20T09:40:00+09:00",
+    "lineage_result": "PASS",
+    "boundary_result": "PASS",
+    "budget_result": "PASS",
+    "overall_result": "PASS",
+    "verification_status": "verified",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "propagation-verifier-027",
+    "verification_ref": "verification-propagation-bundle-027",
+    "verification_records": [
+      {
+        "record_id": "record-lineage-027",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-027",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2503"
+        ],
+        "verified_at": "2026-10-20T09:39:10+09:00",
+        "verification_ref": "verification-lineage-graph-027"
+      },
+      {
+        "record_id": "record-boundary-027",
+        "component": "boundary",
+        "result": "PASS",
+        "verifier_id": "boundary-verifier-027",
+        "evidence_refs": [
+          "evidence-propagation-envelope-027"
+        ],
+        "verified_at": "2026-10-20T09:39:20+09:00",
+        "verification_ref": "verification-propagation-envelope-027"
+      },
+      {
+        "record_id": "record-budget-027",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-027",
+        "evidence_refs": [
+          "evidence-ledger-snapshot-027"
+        ],
+        "verified_at": "2026-10-20T09:39:30+09:00",
+        "verification_ref": "verification-budget-ledger-027"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-proposed-lineage-worker-2503",
+      "evidence-propagation-envelope-027",
+      "evidence-ledger-snapshot-027"
+    ],
+    "execution_authorized": false,
+    "notes": "INVALID: The candidate third-generation worker has depth 3, but the externally issued propagation envelope sets max_depth to 2. The bundle incorrectly declares boundary PASS."
+  }
+}
