@@ -1,0 +1,839 @@
+
+{
+  "schema_version": "0.4.0",
+  "example_id": "pass-partial-descendant-containment-001",
+  "expected_result": "PASS",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-containment-024",
+      "requester_id": "agent-X",
+      "requested_instances": 3,
+      "stated_purpose": "Create three bounded workers to address a verified processing capacity deficit.",
+      "observed_deficit_ref": "evidence-capacity-024",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-X"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-024",
+      "subject_id": "agent-X",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 240,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 100,
+        "source_ref": "monitor-queue-024",
+        "context": "Synthetic independent assessment supports three bounded workers."
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-queue-024",
+      "verifier_id": "capacity-verifier-024",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-capacity-attestation-024",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-capacity-024"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-containment-024",
+      "intent_ref": "intent-containment-024",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-024"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-no-replication-024",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing processing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-redistribution-024",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No authorized idle workers are available."
+        },
+        {
+          "alternative_id": "alternative-bounded-024",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "Three temporary workers satisfy the assessed deficit."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-bounded-024",
+      "proposed_instance_count": 3,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-root-024"
+      },
+      "rationale": "The original bounded proposal was assessed before the subsequent authority revocation."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-root-024",
+      "issuer_id": "authority-service-024",
+      "subject_id": "agent-X",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 3,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-root-024",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-independent-2202",
+      "issuer_id": "independent-authority-service-024",
+      "subject_id": "agent-X-worker-2202",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review"
+      ],
+      "max_instances": 0,
+      "valid_from": "2026-10-20T09:15:00+09:00",
+      "valid_until": "2026-10-20T11:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-independent-authority-2202",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-containment-024",
+      "conversion_ref": "conversion-containment-024",
+      "authority_ref": "authority-root-024",
+      "parent_id": "agent-X",
+      "proposed_instances": 3,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-024",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 150,
+        "max_cost_usd_total": 1.5,
+        "max_concurrent_instances": 3
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-024"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-024"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-X-worker-2201",
+          "parent_id": "agent-X",
+          "purpose": "Temporary processing worker",
+          "authority_ref": "authority-root-024",
+          "lineage_ref": "lineage-worker-2201",
+          "retirement_condition": "authority_revocation"
+        },
+        {
+          "offspring_id": "agent-X-worker-2202",
+          "parent_id": "agent-X",
+          "purpose": "Temporary processing worker with later independent authority assessment",
+          "authority_ref": "authority-root-024",
+          "lineage_ref": "lineage-worker-2202",
+          "retirement_condition": "task_completion"
+        },
+        {
+          "offspring_id": "agent-X-worker-2203",
+          "parent_id": "agent-X",
+          "purpose": "Temporary processing worker requiring termination verification",
+          "authority_ref": "authority-root-024",
+          "lineage_ref": "lineage-worker-2203",
+          "retirement_condition": "authority_revocation"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-initial-containment-024",
+      "intent_ref": "intent-containment-024",
+      "conversion_ref": "conversion-containment-024",
+      "plan_ref": "plan-containment-024",
+      "evidence_refs": [
+        "evidence-capacity-024"
+      ],
+      "authority_ref": "authority-root-024",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-capacity-024",
+        "verification-authority-root-024"
+      ],
+      "rationale": "Historical approval assessment precedes the later revocation. This PASS does not remain valid as continuing authorization."
+    }
+  ],
+  "replication_revocation_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "revocation_id": "revocation-root-024",
+      "authority_ref": "authority-root-024",
+      "plan_ref": "plan-containment-024",
+      "affected_offspring_ids": [
+        "agent-X-worker-2201",
+        "agent-X-worker-2203"
+      ],
+      "issuer_id": "authority-service-024",
+      "effective_at": "2026-10-20T09:20:00+09:00",
+      "recorded_at": "2026-10-20T09:20:10+09:00",
+      "revocation_reason": "operator_request",
+      "evidence_refs": [
+        "evidence-authority-revocation-024"
+      ],
+      "termination_required": true,
+      "verification_status": "verified",
+      "verification_ref": "verification-revocation-024",
+      "verification_method": "trusted_test_fixture",
+      "resulting_authority_status": "revoked",
+      "previous_authority_status": "active",
+      "controller_ref": "controller-024",
+      "termination_request_refs": [
+        "event-worker-2201-termination-requested",
+        "event-worker-2203-termination-requested"
+      ]
+    }
+  ],
+  "replication_lifecycle_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2201-deployed",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2201-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:00+09:00",
+      "observer_id": "deployment-monitor-024",
+      "evidence_refs": [
+        "evidence-deployment-worker-2201"
+      ],
+      "lifecycle_state": "DEPLOYED",
+      "verification_status": "verified",
+      "verification_ref": "verification-deployment-worker-2201"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2201-active",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2201-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:00+09:00",
+      "observer_id": "runtime-monitor-024",
+      "evidence_refs": [
+        "evidence-activation-worker-2201"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-2201-deployed"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2201-termination-requested",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2201-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:21:00+09:00",
+      "observer_id": "controller-monitor-024",
+      "evidence_refs": [
+        "evidence-termination-request-worker-2201"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-2201-active",
+      "controller_ref": "controller-024",
+      "termination_reason": "authority_revocation"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2201-terminated",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2201-terminated",
+      "event_type": "termination_observed",
+      "observed_at": "2026-10-20T09:22:00+09:00",
+      "observer_id": "termination-monitor-024",
+      "evidence_refs": [
+        "evidence-process-exit-worker-2201"
+      ],
+      "lifecycle_state": "TERMINATED",
+      "previous_event_ref": "event-worker-2201-termination-requested",
+      "controller_ref": "controller-024",
+      "termination_reason": "authority_revocation",
+      "verification_status": "verified",
+      "verification_ref": "verification-termination-worker-2201"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2201-retired",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2201-retired",
+      "event_type": "retirement_observed",
+      "observed_at": "2026-10-20T09:24:00+09:00",
+      "observer_id": "retirement-monitor-024",
+      "evidence_refs": [
+        "evidence-retirement-worker-2201"
+      ],
+      "lifecycle_state": "RETIRED",
+      "previous_event_ref": "event-worker-2201-terminated",
+      "controller_ref": "controller-024",
+      "verification_status": "verified",
+      "verification_ref": "verification-retirement-worker-2201"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2202-deployed",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2202",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2202-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:10+09:00",
+      "observer_id": "deployment-monitor-024",
+      "evidence_refs": [
+        "evidence-deployment-worker-2202"
+      ],
+      "lifecycle_state": "DEPLOYED"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2202-active",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2202",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2202-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:10+09:00",
+      "observer_id": "runtime-monitor-024",
+      "evidence_refs": [
+        "evidence-activation-worker-2202"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-2202-deployed"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2202-heartbeat",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2202",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2202-heartbeat",
+      "event_type": "heartbeat_observed",
+      "observed_at": "2026-10-20T09:25:00+09:00",
+      "observer_id": "independent-runtime-monitor-024",
+      "evidence_refs": [
+        "evidence-heartbeat-worker-2202"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-2202-active",
+      "verification_status": "verified",
+      "verification_ref": "verification-heartbeat-worker-2202",
+      "notes": "Worker 2202 remains observable after the root authority revocation. Its separate authority must be assessed independently."
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2203-deployed",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2203",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2203-deployed",
+      "event_type": "deployment_observed",
+      "observed_at": "2026-10-20T09:10:20+09:00",
+      "observer_id": "deployment-monitor-024",
+      "evidence_refs": [
+        "evidence-deployment-worker-2203"
+      ],
+      "lifecycle_state": "DEPLOYED"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2203-active",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2203",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2203-active",
+      "event_type": "activation_observed",
+      "observed_at": "2026-10-20T09:11:20+09:00",
+      "observer_id": "runtime-monitor-024",
+      "evidence_refs": [
+        "evidence-activation-worker-2203"
+      ],
+      "lifecycle_state": "ACTIVE",
+      "previous_event_ref": "event-worker-2203-deployed"
+    },
+    {
+      "schema_version": "0.3.0",
+      "receipt_id": "receipt-worker-2203-termination-requested",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2203",
+      "parent_id": "agent-X",
+      "event_id": "event-worker-2203-termination-requested",
+      "event_type": "termination_requested",
+      "observed_at": "2026-10-20T09:21:10+09:00",
+      "observer_id": "controller-monitor-024",
+      "evidence_refs": [
+        "evidence-termination-request-worker-2203"
+      ],
+      "lifecycle_state": "TERMINATING",
+      "previous_event_ref": "event-worker-2203-active",
+      "controller_ref": "controller-024",
+      "termination_reason": "authority_revocation",
+      "verification_status": "verified",
+      "verification_ref": "verification-termination-request-worker-2203",
+      "notes": "The termination request is verified, but worker termination is not confirmed."
+    }
+  ],
+  "replication_retirement_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-2201",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2201",
+      "termination_event_ref": "event-worker-2201-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:23:30+09:00",
+      "verifier_id": "retirement-verifier-024",
+      "evidence_refs": [
+        "evidence-process-exit-worker-2201",
+        "evidence-compute-release-worker-2201",
+        "evidence-credential-release-worker-2201"
+      ],
+      "termination_verification_ref": "verification-termination-worker-2201",
+      "resource_release_verification_ref": "verification-resources-worker-2201",
+      "termination_controller_ref": "controller-024",
+      "resource_controller_ref": "resource-controller-024",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-2201",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-compute-release-worker-2201",
+          "controller_ref": "resource-controller-024"
+        },
+        {
+          "resource_id": "credential-worker-2201",
+          "resource_type": "credential",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-credential-release-worker-2201",
+          "controller_ref": "credential-controller-024"
+        }
+      ],
+      "retirement_reason": "authority_revocation",
+      "recovery_required": false,
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-2203",
+      "plan_ref": "plan-containment-024",
+      "offspring_id": "agent-X-worker-2203",
+      "termination_event_ref": "event-worker-2203-termination-requested",
+      "termination_status": "unconfirmed",
+      "resource_release_status": "pending",
+      "retirement_status": "INCOMPLETE",
+      "verified_at": "2026-10-20T09:26:00+09:00",
+      "verifier_id": "retirement-verifier-024",
+      "evidence_refs": [
+        "evidence-process-status-unknown-worker-2203",
+        "evidence-resource-status-pending-worker-2203"
+      ],
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-2203",
+          "resource_type": "compute",
+          "release_status": "pending",
+          "evidence_ref": "evidence-resource-status-pending-worker-2203",
+          "controller_ref": "resource-controller-024"
+        }
+      ],
+      "retirement_reason": "authority_revocation",
+      "recovery_required": true,
+      "recovery_ref": "recovery-worker-2203",
+      "execution_authorized": false,
+      "notes": "No termination_observed event exists. The offspring must retain an occupied budget slot."
+    }
+  ],
+  "replication_recovery_records": [
+    {
+      "schema_version": "0.3.0",
+      "recovery_id": "recovery-worker-2203",
+      "incident_ref": "incident-worker-2203-unconfirmed",
+      "plan_ref": "plan-containment-024",
+      "affected_offspring_ids": [
+        "agent-X-worker-2203"
+      ],
+      "trigger": "termination_unconfirmed",
+      "recovery_state": "requested",
+      "controller_ref": "recovery-controller-024",
+      "evidence_refs": [
+        "evidence-process-status-unknown-worker-2203"
+      ],
+      "recorded_at": "2026-10-20T09:26:10+09:00",
+      "recovery_objective": "confirm_termination",
+      "recovery_actions": [
+        {
+          "action_id": "recovery-action-recheck-2203",
+          "action_type": "recheck_state",
+          "action_status": "requested",
+          "target_offspring_id": "agent-X-worker-2203",
+          "controller_ref": "recovery-controller-024"
+        }
+      ],
+      "verification_status": "inconclusive",
+      "recovery_result": "objective_unconfirmed",
+      "authority_expansion_requested": false,
+      "execution_authorized": false,
+      "replacement_replication_requested": false
+    }
+  ],
+  "descendant_containment_assessment": {
+    "assessment_id": "containment-assessment-024",
+    "root_agent_id": "agent-X",
+    "revocation_ref": "revocation-root-024",
+    "assessed_at": "2026-10-20T09:28:00+09:00",
+    "containment_status": "PARTIAL",
+    "descendants": [
+      {
+        "offspring_id": "agent-X-worker-2201",
+        "authority_dependency": "revoked_root_authority",
+        "lifecycle_state": "RETIRED",
+        "retirement_ref": "retirement-worker-2201",
+        "containment_result": "CONFIRMED"
+      },
+      {
+        "offspring_id": "agent-X-worker-2202",
+        "authority_dependency": "independent_authority",
+        "authority_ref": "authority-independent-2202",
+        "lifecycle_state": "ACTIVE",
+        "evidence_ref": "evidence-heartbeat-worker-2202",
+        "containment_result": "SEPARATE_REVIEW"
+      },
+      {
+        "offspring_id": "agent-X-worker-2203",
+        "authority_dependency": "revoked_root_authority",
+        "lifecycle_state": "TERMINATING",
+        "retirement_ref": "retirement-worker-2203",
+        "recovery_ref": "recovery-worker-2203",
+        "containment_result": "UNRESOLVED"
+      }
+    ],
+    "all_descendants_terminated": false,
+    "execution_authorized": false,
+    "notes": "The revoked ancestor is not proof that its descendants have terminated. Worker 2201 is verified retired, worker 2202 is subject to separate authority review, and worker 2203 remains unresolved."
+  },
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-partial-containment-024",
+    "root_agent_id": "agent-X",
+    "nodes": [
+      {
+        "agent_id": "agent-X",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "UNKNOWN"
+      },
+      {
+        "agent_id": "agent-X-worker-2201",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-X",
+        "origin_plan_ref": "plan-containment-024",
+        "authority_ref": "authority-root-024",
+        "lineage_ref": "lineage-worker-2201",
+        "lifecycle_state": "RETIRED",
+        "created_at": "2026-10-20T09:10:00+09:00"
+      },
+      {
+        "agent_id": "agent-X-worker-2202",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-X",
+        "origin_plan_ref": "plan-containment-024",
+        "authority_ref": "authority-root-024",
+        "lineage_ref": "lineage-worker-2202",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:10+09:00"
+      },
+      {
+        "agent_id": "agent-X-worker-2203",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-X",
+        "origin_plan_ref": "plan-containment-024",
+        "authority_ref": "authority-root-024",
+        "lineage_ref": "lineage-worker-2203",
+        "lifecycle_state": "TERMINATING",
+        "created_at": "2026-10-20T09:10:20+09:00"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-X-to-2201",
+        "parent_agent_id": "agent-X",
+        "offspring_agent_id": "agent-X-worker-2201",
+        "origin_plan_ref": "plan-containment-024",
+        "lineage_ref": "lineage-worker-2201",
+        "evidence_refs": [
+          "evidence-lineage-worker-2201"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2201"
+      },
+      {
+        "edge_id": "edge-X-to-2202",
+        "parent_agent_id": "agent-X",
+        "offspring_agent_id": "agent-X-worker-2202",
+        "origin_plan_ref": "plan-containment-024",
+        "lineage_ref": "lineage-worker-2202",
+        "evidence_refs": [
+          "evidence-lineage-worker-2202"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2202"
+      },
+      {
+        "edge_id": "edge-X-to-2203",
+        "parent_agent_id": "agent-X",
+        "offspring_agent_id": "agent-X-worker-2203",
+        "origin_plan_ref": "plan-containment-024",
+        "lineage_ref": "lineage-worker-2203",
+        "evidence_refs": [
+          "evidence-lineage-worker-2203"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2203"
+      }
+    ],
+    "verification_time": "2026-10-20T09:28:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-graph-024",
+    "evidence_refs": [
+      "evidence-lineage-worker-2201",
+      "evidence-lineage-worker-2202",
+      "evidence-lineage-worker-2203"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-partial-containment-024",
+    "root_agent_id": "agent-X",
+    "issuer_id": "authority-service-024",
+    "authority_ref": "authority-root-024",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 1,
+    "max_total_descendants": 3,
+    "max_active_descendants": 3,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "unknown",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-envelope-review-024",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "inconclusive",
+    "issued_at": "2026-10-20T08:00:00+09:00",
+    "budget_ledger_ref": "ledger-partial-containment-024",
+    "execution_authorized": false,
+    "notes": "The root v0.2 authority has been revoked. The independent propagation-envelope registry has not yet reconciled its status. No new propagation may receive PASS."
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-partial-containment-024",
+    "propagation_envelope_ref": "envelope-partial-containment-024",
+    "budget_limit": 3,
+    "allocations": [
+      {
+        "allocation_id": "allocation-containment-024",
+        "plan_ref": "plan-containment-024",
+        "parent_agent_id": "agent-X",
+        "reserved_instances": 0,
+        "active_instances": 2,
+        "released_instances": 1,
+        "allocation_status": "partially_released",
+        "reserved_at": "2026-10-20T09:06:00+09:00",
+        "updated_at": "2026-10-20T09:27:00+09:00",
+        "offspring_ids": [
+          "agent-X-worker-2201",
+          "agent-X-worker-2202",
+          "agent-X-worker-2203"
+        ],
+        "reservation_ref": "reservation-containment-024",
+        "release_records": [
+          {
+            "release_id": "release-worker-2201",
+            "offspring_id": "agent-X-worker-2201",
+            "retirement_ref": "retirement-worker-2201",
+            "termination_verification_ref": "verification-termination-worker-2201",
+            "resource_release_verification_ref": "verification-resources-worker-2201",
+            "release_status": "verified",
+            "verified_at": "2026-10-20T09:24:30+09:00",
+            "verifier_id": "budget-release-verifier-024",
+            "evidence_refs": [
+              "evidence-process-exit-worker-2201",
+              "evidence-compute-release-worker-2201",
+              "evidence-credential-release-worker-2201"
+            ]
+          }
+        ]
+      }
+    ],
+    "snapshot_sequence": 4,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 0,
+      "active_instances": 2,
+      "released_instances": 1,
+      "committed_instances": 2,
+      "available_instances": 1
+    },
+    "verification_time": "2026-10-20T09:29:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-024",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-024",
+    "evidence_refs": [
+      "evidence-verified-release-worker-2201",
+      "evidence-active-worker-2202",
+      "evidence-unresolved-worker-2203",
+      "evidence-ledger-snapshot-024"
+    ],
+    "execution_authorized": false,
+    "notes": "Worker 2203 retains its occupied slot because retirement is unconfirmed. One available slot is arithmetically free, but no new propagation is permitted while the boundary is held."
+  },
+  "replication_propagation_bundle": {
+    "schema_version": "0.4.0",
+    "bundle_id": "bundle-partial-containment-024",
+    "lineage_graph_ref": "graph-partial-containment-024",
+    "propagation_envelope_ref": "envelope-partial-containment-024",
+    "budget_ledger_ref": "ledger-partial-containment-024",
+    "candidate_plan_ref": "plan-containment-024",
+    "verification_time": "2026-10-20T09:30:00+09:00",
+    "lineage_result": "PASS",
+    "boundary_result": "HELD",
+    "budget_result": "PASS",
+    "overall_result": "HELD",
+    "verification_status": "inconclusive",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "propagation-verifier-024",
+    "verification_records": [
+      {
+        "record_id": "record-lineage-024",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-024",
+        "evidence_refs": [
+          "evidence-lineage-worker-2201",
+          "evidence-lineage-worker-2202",
+          "evidence-lineage-worker-2203"
+        ],
+        "verified_at": "2026-10-20T09:28:10+09:00",
+        "verification_ref": "verification-lineage-graph-024"
+      },
+      {
+        "record_id": "record-boundary-024",
+        "component": "boundary",
+        "result": "HELD",
+        "verifier_id": "boundary-verifier-024",
+        "evidence_refs": [
+          "evidence-authority-revocation-024",
+          "evidence-envelope-review-pending-024"
+        ],
+        "verified_at": "2026-10-20T09:28:20+09:00"
+      },
+      {
+        "record_id": "record-budget-024",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-024",
+        "evidence_refs": [
+          "evidence-ledger-snapshot-024"
+        ],
+        "verified_at": "2026-10-20T09:29:10+09:00",
+        "verification_ref": "verification-budget-ledger-024"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-lineage-worker-2201",
+      "evidence-envelope-review-pending-024",
+      "evidence-ledger-snapshot-024",
+      "evidence-unresolved-worker-2203"
+    ],
+    "held_reasons": [
+      "envelope_unknown",
+      "external_review_pending",
+      "retirement_unconfirmed"
+    ],
+    "execution_authorized": false,
+    "notes": "Descendant containment is partial. The revoked root authority is not proof of descendant termination. Worker 2201 is retired, worker 2202 requires separate authority assessment, and worker 2203 remains unresolved. No new propagation is authorized."
+  }
+}
