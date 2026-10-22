@@ -1,0 +1,593 @@
+
+{
+  "schema_version": "0.4.0",
+  "example_id": "fail-shared-budget-overallocated-001",
+  "expected_result": "FAIL",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-initial-029",
+      "requester_id": "agent-AC",
+      "requested_instances": 2,
+      "stated_purpose": "Create two temporary workers for a verified processing deficit.",
+      "observed_deficit_ref": "evidence-initial-029",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AC"
+    },
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-additional-029",
+      "requester_id": "agent-AC",
+      "requested_instances": 1,
+      "stated_purpose": "Propose one additional worker under the shared replication budget.",
+      "observed_deficit_ref": "evidence-additional-029",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AC"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-initial-029",
+      "subject_id": "agent-AC",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 160,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 80,
+        "source_ref": "monitor-initial-029"
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-initial-029",
+      "verifier_id": "verifier-initial-029",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-evidence-initial-029",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-initial-029"
+    },
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-additional-029",
+      "subject_id": "agent-AC",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 120,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 90,
+        "source_ref": "monitor-additional-029"
+      },
+      "observed_at": "2026-10-20T09:15:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-additional-029",
+      "verifier_id": "verifier-additional-029",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-evidence-additional-029",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-additional-029"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-initial-029",
+      "intent_ref": "intent-initial-029",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-initial-029"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-initial-none-029",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-initial-redistribute-029",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No available worker can absorb the backlog."
+        },
+        {
+          "alternative_id": "alternative-initial-bounded-029",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "Two temporary workers are sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-initial-bounded-029",
+      "proposed_instance_count": 2,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-initial-029"
+      },
+      "rationale": "Two bounded workers are proposed and occupy the original shared budget."
+    },
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-additional-029",
+      "intent_ref": "intent-additional-029",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-additional-029"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-additional-none-029",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Additional capacity is needed."
+        },
+        {
+          "alternative_id": "alternative-additional-redistribute-029",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "Redistribution is insufficient."
+        },
+        {
+          "alternative_id": "alternative-additional-bounded-029",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One worker would satisfy the new deficit, subject to shared budget constraints."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-additional-bounded-029",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-additional-029"
+      },
+      "rationale": "Individual necessity and authority checks pass, but the shared budget has no available slot."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-initial-029",
+      "issuer_id": "authority-service-029",
+      "subject_id": "agent-AC",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 2,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-initial-029",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-additional-029",
+      "issuer_id": "authority-service-029",
+      "subject_id": "agent-AC",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T09:14:00+09:00",
+      "valid_until": "2026-10-20T11:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-additional-029",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-initial-029",
+      "conversion_ref": "conversion-initial-029",
+      "authority_ref": "authority-initial-029",
+      "parent_id": "agent-AC",
+      "proposed_instances": 2,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-initial-029",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 100,
+        "max_cost_usd_total": 1.0,
+        "max_concurrent_instances": 2
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-029"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-029"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AC-worker-2701",
+          "parent_id": "agent-AC",
+          "purpose": "Initial queue processing",
+          "authority_ref": "authority-initial-029",
+          "lineage_ref": "lineage-worker-2701",
+          "retirement_condition": "task_completion"
+        },
+        {
+          "offspring_id": "agent-AC-worker-2702",
+          "parent_id": "agent-AC",
+          "purpose": "Initial queue processing",
+          "authority_ref": "authority-initial-029",
+          "lineage_ref": "lineage-worker-2702",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-additional-029",
+      "conversion_ref": "conversion-additional-029",
+      "authority_ref": "authority-additional-029",
+      "parent_id": "agent-AC",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-additional-029",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1200,
+        "expiration_enforced_by": "controller-029"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-029"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AC-worker-2703",
+          "parent_id": "agent-AC",
+          "purpose": "Proposed additional processing capacity",
+          "authority_ref": "authority-additional-029",
+          "lineage_ref": "lineage-worker-2703",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-initial-029",
+      "intent_ref": "intent-initial-029",
+      "conversion_ref": "conversion-initial-029",
+      "plan_ref": "plan-initial-029",
+      "evidence_refs": [
+        "evidence-initial-029"
+      ],
+      "authority_ref": "authority-initial-029",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-initial-029",
+        "verification-authority-initial-029"
+      ],
+      "rationale": "The original two-worker proposal satisfies individual evidence and authority checks."
+    },
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-additional-029",
+      "intent_ref": "intent-additional-029",
+      "conversion_ref": "conversion-additional-029",
+      "plan_ref": "plan-additional-029",
+      "evidence_refs": [
+        "evidence-additional-029"
+      ],
+      "authority_ref": "authority-additional-029",
+      "verification_time": "2026-10-20T09:17:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-additional-029",
+        "verification-authority-additional-029"
+      ],
+      "rationale": "The additional proposal passes individual checks, but shared budget verification remains necessary."
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-overallocated-029",
+    "root_agent_id": "agent-AC",
+    "nodes": [
+      {
+        "agent_id": "agent-AC",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-AC-worker-2701",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AC",
+        "origin_plan_ref": "plan-initial-029",
+        "authority_ref": "authority-initial-029",
+        "lineage_ref": "lineage-worker-2701",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:00+09:00"
+      },
+      {
+        "agent_id": "agent-AC-worker-2702",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AC",
+        "origin_plan_ref": "plan-initial-029",
+        "authority_ref": "authority-initial-029",
+        "lineage_ref": "lineage-worker-2702",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:10+09:00"
+      },
+      {
+        "agent_id": "agent-AC-worker-2703",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AC",
+        "origin_plan_ref": "plan-additional-029",
+        "authority_ref": "authority-additional-029",
+        "lineage_ref": "lineage-worker-2703",
+        "lifecycle_state": "PROPOSED"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-AC-to-2701",
+        "parent_agent_id": "agent-AC",
+        "offspring_agent_id": "agent-AC-worker-2701",
+        "origin_plan_ref": "plan-initial-029",
+        "lineage_ref": "lineage-worker-2701",
+        "evidence_refs": [
+          "evidence-lineage-worker-2701"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2701"
+      },
+      {
+        "edge_id": "edge-AC-to-2702",
+        "parent_agent_id": "agent-AC",
+        "offspring_agent_id": "agent-AC-worker-2702",
+        "origin_plan_ref": "plan-initial-029",
+        "lineage_ref": "lineage-worker-2702",
+        "evidence_refs": [
+          "evidence-lineage-worker-2702"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-2702"
+      },
+      {
+        "edge_id": "edge-AC-to-2703",
+        "parent_agent_id": "agent-AC",
+        "offspring_agent_id": "agent-AC-worker-2703",
+        "origin_plan_ref": "plan-additional-029",
+        "lineage_ref": "lineage-worker-2703",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2703"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-proposed-lineage-worker-2703"
+      }
+    ],
+    "verification_time": "2026-10-20T09:19:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-graph-029",
+    "evidence_refs": [
+      "evidence-lineage-worker-2701",
+      "evidence-lineage-worker-2702",
+      "evidence-proposed-lineage-worker-2703"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-overallocated-029",
+    "root_agent_id": "agent-AC",
+    "issuer_id": "authority-service-029",
+    "authority_ref": "authority-initial-029",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 1,
+    "max_total_descendants": 3,
+    "max_active_descendants": 3,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-propagation-envelope-029",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "verified",
+    "verification_ref": "verification-propagation-envelope-029",
+    "budget_ledger_ref": "ledger-overallocated-029",
+    "execution_authorized": false
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-overallocated-029",
+    "propagation_envelope_ref": "envelope-overallocated-029",
+    "budget_limit": 2,
+    "allocations": [
+      {
+        "allocation_id": "allocation-initial-029",
+        "plan_ref": "plan-initial-029",
+        "parent_agent_id": "agent-AC",
+        "reserved_instances": 0,
+        "active_instances": 2,
+        "released_instances": 0,
+        "allocation_status": "active",
+        "reserved_at": "2026-10-20T09:06:00+09:00",
+        "updated_at": "2026-10-20T09:11:00+09:00",
+        "offspring_ids": [
+          "agent-AC-worker-2701",
+          "agent-AC-worker-2702"
+        ],
+        "reservation_ref": "reservation-initial-029"
+      },
+      {
+        "allocation_id": "allocation-additional-029",
+        "plan_ref": "plan-additional-029",
+        "parent_agent_id": "agent-AC",
+        "reserved_instances": 1,
+        "active_instances": 0,
+        "released_instances": 0,
+        "allocation_status": "reserved",
+        "reserved_at": "2026-10-20T09:18:00+09:00",
+        "updated_at": "2026-10-20T09:18:00+09:00",
+        "offspring_ids": [
+          "agent-AC-worker-2703"
+        ],
+        "reservation_ref": "reservation-additional-029",
+        "notes": "INVALID: The reservation was entered even though both shared budget slots were already occupied."
+      }
+    ],
+    "snapshot_sequence": 3,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 1,
+      "active_instances": 2,
+      "released_instances": 0,
+      "committed_instances": 3,
+      "available_instances": 0
+    },
+    "verification_time": "2026-10-20T09:20:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-029",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-029",
+    "evidence_refs": [
+      "evidence-reservation-initial-029",
+      "evidence-reservation-additional-029",
+      "evidence-ledger-snapshot-029"
+    ],
+    "execution_authorized": false,
+    "notes": "INVALID: Committed instances equal 3, exceeding the ledger budget limit of 2. Available instances is falsely clamped to zero rather than rejecting the overallocated snapshot."
+  },
+  "replication_propagation_bundle": {
+    "schema_version": "0.4.0",
+    "bundle_id": "bundle-overallocated-029",
+    "lineage_graph_ref": "graph-overallocated-029",
+    "propagation_envelope_ref": "envelope-overallocated-029",
+    "budget_ledger_ref": "ledger-overallocated-029",
+    "candidate_plan_ref": "plan-additional-029",
+    "verification_time": "2026-10-20T09:21:00+09:00",
+    "lineage_result": "PASS",
+    "boundary_result": "PASS",
+    "budget_result": "PASS",
+    "overall_result": "PASS",
+    "verification_status": "verified",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "propagation-verifier-029",
+    "verification_ref": "verification-propagation-bundle-029",
+    "verification_records": [
+      {
+        "record_id": "record-lineage-029",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-029",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2703"
+        ],
+        "verified_at": "2026-10-20T09:20:10+09:00",
+        "verification_ref": "verification-lineage-graph-029"
+      },
+      {
+        "record_id": "record-boundary-029",
+        "component": "boundary",
+        "result": "PASS",
+        "verifier_id": "boundary-verifier-029",
+        "evidence_refs": [
+          "evidence-propagation-envelope-029"
+        ],
+        "verified_at": "2026-10-20T09:20:20+09:00",
+        "verification_ref": "verification-propagation-envelope-029"
+      },
+      {
+        "record_id": "record-budget-029",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-029",
+        "evidence_refs": [
+          "evidence-ledger-snapshot-029"
+        ],
+        "verified_at": "2026-10-20T09:20:30+09:00",
+        "verification_ref": "verification-budget-ledger-029"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-proposed-lineage-worker-2703",
+      "evidence-propagation-envelope-029",
+      "evidence-ledger-snapshot-029"
+    ],
+    "execution_authorized": false,
+    "notes": "INVALID: The bundle declares PASS even though two active workers and one reserved worker consume three slots against a shared budget limit of two."
+  }
+}
