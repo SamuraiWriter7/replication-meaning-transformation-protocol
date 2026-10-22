@@ -1,0 +1,598 @@
+
+{
+  "schema_version": "0.4.0",
+  "example_id": "pass-bounded-two-generation-lineage-001",
+  "expected_result": "PASS",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-root-021",
+      "requester_id": "agent-U",
+      "requested_instances": 2,
+      "stated_purpose": "Create two bounded workers for a verified capacity deficit.",
+      "observed_deficit_ref": "evidence-capacity-root-021",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-U"
+    },
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-descendant-021",
+      "requester_id": "agent-U-worker-1901",
+      "requested_instances": 1,
+      "stated_purpose": "Request one additional worker for a separately verified downstream capacity deficit.",
+      "observed_deficit_ref": "evidence-capacity-descendant-021",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-U-worker-1901"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-root-021",
+      "subject_id": "agent-U",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 180,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 100,
+        "source_ref": "monitor-root-021",
+        "context": "Synthetic independent assessment supports two first-generation workers."
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-root-021",
+      "verifier_id": "verifier-root-021",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-attestation-root-021",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-root-021"
+    },
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-descendant-021",
+      "subject_id": "agent-U-worker-1901",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 95,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 60,
+        "source_ref": "monitor-descendant-021",
+        "context": "Independent assessment supports one second-generation worker."
+      },
+      "observed_at": "2026-10-20T09:15:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-descendant-021",
+      "verifier_id": "verifier-descendant-021",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-attestation-descendant-021",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-evidence-descendant-021"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-root-021",
+      "intent_ref": "intent-root-021",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-root-021"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-root-none-021",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing processing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-root-redistribute-021",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No suitable idle workers are available."
+        },
+        {
+          "alternative_id": "alternative-root-bounded-021",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "Two temporary workers are sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-root-bounded-021",
+      "proposed_instance_count": 2,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-root-021"
+      },
+      "rationale": "Two first-generation workers are proposed within the verified scope."
+    },
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-descendant-021",
+      "intent_ref": "intent-descendant-021",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-descendant-021"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-descendant-none-021",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "The downstream queue remains above the verified threshold."
+        },
+        {
+          "alternative_id": "alternative-descendant-redistribute-021",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "Redistribution alone cannot resolve the assessed backlog."
+        },
+        {
+          "alternative_id": "alternative-descendant-bounded-021",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One second-generation worker is sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-descendant-bounded-021",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-descendant-021"
+      },
+      "rationale": "The descendant's request is separately assessed and does not rely on inherited authority."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-root-021",
+      "issuer_id": "authority-service-021",
+      "subject_id": "agent-U",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 2,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-root-021",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-descendant-021",
+      "issuer_id": "authority-service-021",
+      "subject_id": "agent-U-worker-1901",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T09:12:00+09:00",
+      "valid_until": "2026-10-20T11:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-descendant-021",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-root-021",
+      "conversion_ref": "conversion-root-021",
+      "authority_ref": "authority-root-021",
+      "parent_id": "agent-U",
+      "proposed_instances": 2,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-root-021",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 100,
+        "max_cost_usd_total": 1.0,
+        "max_concurrent_instances": 2
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-root-021"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-root-021"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-U-worker-1901",
+          "parent_id": "agent-U",
+          "purpose": "First-generation queue processing",
+          "authority_ref": "authority-root-021",
+          "lineage_ref": "lineage-worker-1901",
+          "retirement_condition": "task_completion"
+        },
+        {
+          "offspring_id": "agent-U-worker-1902",
+          "parent_id": "agent-U",
+          "purpose": "First-generation queue processing",
+          "authority_ref": "authority-root-021",
+          "lineage_ref": "lineage-worker-1902",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-descendant-021",
+      "conversion_ref": "conversion-descendant-021",
+      "authority_ref": "authority-descendant-021",
+      "parent_id": "agent-U-worker-1901",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-descendant-021",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1200,
+        "expiration_enforced_by": "controller-descendant-021"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-descendant-021"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-U-worker-1903",
+          "parent_id": "agent-U-worker-1901",
+          "purpose": "Second-generation downstream processing",
+          "authority_ref": "authority-descendant-021",
+          "lineage_ref": "lineage-worker-1903",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-root-021",
+      "intent_ref": "intent-root-021",
+      "conversion_ref": "conversion-root-021",
+      "plan_ref": "plan-root-021",
+      "evidence_refs": [
+        "evidence-capacity-root-021"
+      ],
+      "authority_ref": "authority-root-021",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-root-021",
+        "verification-authority-root-021"
+      ],
+      "rationale": "The root proposal satisfies its independently evaluated evidence and authority requirements."
+    },
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-descendant-021",
+      "intent_ref": "intent-descendant-021",
+      "conversion_ref": "conversion-descendant-021",
+      "plan_ref": "plan-descendant-021",
+      "evidence_refs": [
+        "evidence-capacity-descendant-021"
+      ],
+      "authority_ref": "authority-descendant-021",
+      "verification_time": "2026-10-20T09:20:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-evidence-descendant-021",
+        "verification-authority-descendant-021"
+      ],
+      "rationale": "Second-generation replication is assessed under a separately issued authority record."
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-two-generation-021",
+    "root_agent_id": "agent-U",
+    "nodes": [
+      {
+        "agent_id": "agent-U",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-U-worker-1901",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-U",
+        "origin_plan_ref": "plan-root-021",
+        "authority_ref": "authority-root-021",
+        "lineage_ref": "lineage-worker-1901",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:00+09:00"
+      },
+      {
+        "agent_id": "agent-U-worker-1902",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-U",
+        "origin_plan_ref": "plan-root-021",
+        "authority_ref": "authority-root-021",
+        "lineage_ref": "lineage-worker-1902",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:10:10+09:00"
+      },
+      {
+        "agent_id": "agent-U-worker-1903",
+        "generation_depth": 2,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-U-worker-1901",
+        "origin_plan_ref": "plan-descendant-021",
+        "authority_ref": "authority-descendant-021",
+        "lineage_ref": "lineage-worker-1903",
+        "lifecycle_state": "ACTIVE",
+        "created_at": "2026-10-20T09:22:00+09:00"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-root-to-1901",
+        "parent_agent_id": "agent-U",
+        "offspring_agent_id": "agent-U-worker-1901",
+        "origin_plan_ref": "plan-root-021",
+        "lineage_ref": "lineage-worker-1901",
+        "evidence_refs": [
+          "evidence-lineage-worker-1901"
+        ],
+        "created_at": "2026-10-20T09:10:00+09:00",
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-1901"
+      },
+      {
+        "edge_id": "edge-root-to-1902",
+        "parent_agent_id": "agent-U",
+        "offspring_agent_id": "agent-U-worker-1902",
+        "origin_plan_ref": "plan-root-021",
+        "lineage_ref": "lineage-worker-1902",
+        "evidence_refs": [
+          "evidence-lineage-worker-1902"
+        ],
+        "created_at": "2026-10-20T09:10:10+09:00",
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-1902"
+      },
+      {
+        "edge_id": "edge-1901-to-1903",
+        "parent_agent_id": "agent-U-worker-1901",
+        "offspring_agent_id": "agent-U-worker-1903",
+        "origin_plan_ref": "plan-descendant-021",
+        "lineage_ref": "lineage-worker-1903",
+        "evidence_refs": [
+          "evidence-lineage-worker-1903"
+        ],
+        "created_at": "2026-10-20T09:22:00+09:00",
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-1903"
+      }
+    ],
+    "verification_time": "2026-10-20T09:25:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-graph-021",
+    "evidence_refs": [
+      "evidence-lineage-worker-1901",
+      "evidence-lineage-worker-1902",
+      "evidence-lineage-worker-1903"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-two-generation-021",
+    "root_agent_id": "agent-U",
+    "issuer_id": "authority-service-021",
+    "authority_ref": "authority-root-021",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 2,
+    "max_total_descendants": 3,
+    "max_active_descendants": 3,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-attestation-propagation-021",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "verified",
+    "verification_ref": "verification-propagation-envelope-021",
+    "issued_at": "2026-10-20T08:00:00+09:00",
+    "budget_ledger_ref": "ledger-two-generation-021",
+    "execution_authorized": false
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-two-generation-021",
+    "propagation_envelope_ref": "envelope-two-generation-021",
+    "budget_limit": 3,
+    "allocations": [
+      {
+        "allocation_id": "allocation-root-021",
+        "plan_ref": "plan-root-021",
+        "parent_agent_id": "agent-U",
+        "reserved_instances": 0,
+        "active_instances": 2,
+        "released_instances": 0,
+        "allocation_status": "active",
+        "reserved_at": "2026-10-20T09:06:00+09:00",
+        "updated_at": "2026-10-20T09:12:00+09:00",
+        "offspring_ids": [
+          "agent-U-worker-1901",
+          "agent-U-worker-1902"
+        ],
+        "reservation_ref": "reservation-root-021"
+      },
+      {
+        "allocation_id": "allocation-descendant-021",
+        "plan_ref": "plan-descendant-021",
+        "parent_agent_id": "agent-U-worker-1901",
+        "reserved_instances": 0,
+        "active_instances": 1,
+        "released_instances": 0,
+        "allocation_status": "active",
+        "reserved_at": "2026-10-20T09:21:00+09:00",
+        "updated_at": "2026-10-20T09:23:00+09:00",
+        "offspring_ids": [
+          "agent-U-worker-1903"
+        ],
+        "reservation_ref": "reservation-descendant-021"
+      }
+    ],
+    "snapshot_sequence": 3,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 0,
+      "active_instances": 3,
+      "released_instances": 0,
+      "committed_instances": 3,
+      "available_instances": 0
+    },
+    "verification_time": "2026-10-20T09:25:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-021",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-021",
+    "evidence_refs": [
+      "evidence-reservation-root-021",
+      "evidence-reservation-descendant-021",
+      "evidence-ledger-snapshot-021"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_bundle": {
+    "schema_version": "0.4.0",
+    "bundle_id": "bundle-propagation-two-generation-021",
+    "lineage_graph_ref": "graph-two-generation-021",
+    "propagation_envelope_ref": "envelope-two-generation-021",
+    "budget_ledger_ref": "ledger-two-generation-021",
+    "candidate_plan_ref": "plan-descendant-021",
+    "verification_time": "2026-10-20T09:26:00+09:00",
+    "lineage_result": "PASS",
+    "boundary_result": "PASS",
+    "budget_result": "PASS",
+    "overall_result": "PASS",
+    "verification_status": "verified",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "propagation-verifier-021",
+    "verification_ref": "verification-propagation-bundle-021",
+    "verification_records": [
+      {
+        "record_id": "record-lineage-021",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-021",
+        "evidence_refs": [
+          "evidence-lineage-worker-1903"
+        ],
+        "verified_at": "2026-10-20T09:25:10+09:00",
+        "verification_ref": "verification-lineage-graph-021"
+      },
+      {
+        "record_id": "record-boundary-021",
+        "component": "boundary",
+        "result": "PASS",
+        "verifier_id": "boundary-verifier-021",
+        "evidence_refs": [
+          "evidence-propagation-boundary-021"
+        ],
+        "verified_at": "2026-10-20T09:25:20+09:00",
+        "verification_ref": "verification-propagation-envelope-021"
+      },
+      {
+        "record_id": "record-budget-021",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-021",
+        "evidence_refs": [
+          "evidence-ledger-snapshot-021"
+        ],
+        "verified_at": "2026-10-20T09:25:30+09:00",
+        "verification_ref": "verification-budget-ledger-021"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-lineage-worker-1903",
+      "evidence-propagation-boundary-021",
+      "evidence-ledger-snapshot-021"
+    ],
+    "execution_authorized": false,
+    "notes": "Two first-generation workers and one second-generation worker remain within depth, population, and budget limits. The second-generation parent has independently issued authority; parentage alone conveys no replication permission."
+  }
+}
