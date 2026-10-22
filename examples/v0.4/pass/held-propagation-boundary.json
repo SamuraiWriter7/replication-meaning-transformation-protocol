@@ -1,0 +1,360 @@
+
+{
+  "schema_version": "0.4.0",
+  "example_id": "pass-held-propagation-boundary-001",
+  "expected_result": "PASS",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-held-boundary-023",
+      "requester_id": "agent-W",
+      "requested_instances": 1,
+      "stated_purpose": "Propose one temporary worker for a verified processing capacity deficit.",
+      "observed_deficit_ref": "evidence-capacity-023",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-W"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-023",
+      "subject_id": "agent-W",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 110,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 75,
+        "source_ref": "monitor-queue-023",
+        "context": "Synthetic evidence establishes a need for one additional temporary worker."
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-queue-023",
+      "verifier_id": "capacity-verifier-023",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-capacity-attestation-023",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-capacity-023"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-held-boundary-023",
+      "intent_ref": "intent-held-boundary-023",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-023"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-no-replication-023",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "The existing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-redistribution-023",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No authorized idle worker is available."
+        },
+        {
+          "alternative_id": "alternative-bounded-023",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One temporary worker would address the assessed deficit."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-bounded-023",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-sandbox-023"
+      },
+      "rationale": "The initial proposal is within its separately verified v0.2 authority, subject to additional propagation-boundary verification."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-sandbox-023",
+      "issuer_id": "authority-service-023",
+      "subject_id": "agent-W",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-authority-attestation-023",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-held-boundary-023",
+      "conversion_ref": "conversion-held-boundary-023",
+      "authority_ref": "authority-sandbox-023",
+      "parent_id": "agent-W",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-023",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1200,
+        "expiration_enforced_by": "controller-023"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-023"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-W-worker-2101",
+          "parent_id": "agent-W",
+          "purpose": "Proposed temporary queue-processing capacity",
+          "authority_ref": "authority-sandbox-023",
+          "lineage_ref": "lineage-worker-2101",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-initial-held-boundary-023",
+      "intent_ref": "intent-held-boundary-023",
+      "conversion_ref": "conversion-held-boundary-023",
+      "plan_ref": "plan-held-boundary-023",
+      "evidence_refs": [
+        "evidence-capacity-023"
+      ],
+      "authority_ref": "authority-sandbox-023",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-capacity-023",
+        "verification-authority-023"
+      ],
+      "rationale": "Initial necessity and authority checks pass; this does not resolve the separate v0.4 propagation boundary."
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-held-boundary-023",
+    "root_agent_id": "agent-W",
+    "nodes": [
+      {
+        "agent_id": "agent-W",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-W-worker-2101",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-W",
+        "origin_plan_ref": "plan-held-boundary-023",
+        "authority_ref": "authority-sandbox-023",
+        "lineage_ref": "lineage-worker-2101",
+        "lifecycle_state": "PROPOSED"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-W-to-2101",
+        "parent_agent_id": "agent-W",
+        "offspring_agent_id": "agent-W-worker-2101",
+        "origin_plan_ref": "plan-held-boundary-023",
+        "lineage_ref": "lineage-worker-2101",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2101"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-proposed-lineage-worker-2101"
+      }
+    ],
+    "verification_time": "2026-10-20T09:08:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-graph-023",
+    "evidence_refs": [
+      "evidence-proposed-lineage-worker-2101"
+    ],
+    "execution_authorized": false,
+    "notes": "The graph verifies the proposed parent-child relationship only. Worker 2101 has not been deployed."
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-held-boundary-023",
+    "root_agent_id": "agent-W",
+    "issuer_id": "authority-service-023",
+    "authority_ref": "authority-sandbox-023",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 2,
+    "max_total_descendants": 3,
+    "max_active_descendants": 2,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "unknown",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-pending-envelope-attestation-023",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "inconclusive",
+    "issued_at": "2026-10-20T08:00:00+09:00",
+    "budget_ledger_ref": "ledger-held-boundary-023",
+    "execution_authorized": false,
+    "notes": "The external authority registry has not confirmed whether this propagation envelope remains active. The numeric limits appear sufficient, but the boundary cannot receive PASS."
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-held-boundary-023",
+    "propagation_envelope_ref": "envelope-held-boundary-023",
+    "budget_limit": 2,
+    "allocations": [
+      {
+        "allocation_id": "allocation-held-boundary-023",
+        "plan_ref": "plan-held-boundary-023",
+        "parent_agent_id": "agent-W",
+        "reserved_instances": 1,
+        "active_instances": 0,
+        "released_instances": 0,
+        "allocation_status": "reserved",
+        "reserved_at": "2026-10-20T09:07:00+09:00",
+        "updated_at": "2026-10-20T09:07:00+09:00",
+        "offspring_ids": [
+          "agent-W-worker-2101"
+        ],
+        "reservation_ref": "reservation-held-boundary-023",
+        "notes": "This is a provisional, non-executable reservation held while propagation authority is unresolved."
+      }
+    ],
+    "snapshot_sequence": 1,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 1,
+      "active_instances": 0,
+      "released_instances": 0,
+      "committed_instances": 1,
+      "available_instances": 1
+    },
+    "verification_time": "2026-10-20T09:09:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-023",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-023",
+    "evidence_refs": [
+      "evidence-reservation-023",
+      "evidence-ledger-snapshot-023"
+    ],
+    "execution_authorized": false,
+    "notes": "The budget snapshot and arithmetic are independently verified. Budget PASS does not override the unresolved propagation envelope."
+  },
+  "replication_propagation_bundle": {
+    "schema_version": "0.4.0",
+    "bundle_id": "bundle-propagation-held-boundary-023",
+    "lineage_graph_ref": "graph-held-boundary-023",
+    "propagation_envelope_ref": "envelope-held-boundary-023",
+    "budget_ledger_ref": "ledger-held-boundary-023",
+    "candidate_plan_ref": "plan-held-boundary-023",
+    "verification_time": "2026-10-20T09:10:00+09:00",
+    "lineage_result": "PASS",
+    "boundary_result": "HELD",
+    "budget_result": "PASS",
+    "overall_result": "HELD",
+    "verification_status": "inconclusive",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "propagation-verifier-023",
+    "verification_records": [
+      {
+        "record_id": "record-lineage-023",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-023",
+        "evidence_refs": [
+          "evidence-proposed-lineage-worker-2101"
+        ],
+        "verified_at": "2026-10-20T09:08:30+09:00",
+        "verification_ref": "verification-lineage-graph-023"
+      },
+      {
+        "record_id": "record-boundary-023",
+        "component": "boundary",
+        "result": "HELD",
+        "verifier_id": "boundary-verifier-023",
+        "evidence_refs": [
+          "evidence-envelope-registry-pending-023"
+        ],
+        "verified_at": "2026-10-20T09:09:10+09:00"
+      },
+      {
+        "record_id": "record-budget-023",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-023",
+        "evidence_refs": [
+          "evidence-ledger-snapshot-023"
+        ],
+        "verified_at": "2026-10-20T09:09:30+09:00",
+        "verification_ref": "verification-budget-ledger-023"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-proposed-lineage-worker-2101",
+      "evidence-envelope-registry-pending-023",
+      "evidence-ledger-snapshot-023"
+    ],
+    "held_reasons": [
+      "envelope_unknown",
+      "authority_unverified"
+    ],
+    "execution_authorized": false,
+    "notes": "The base v0.2 authority remains independently verified, but the distinct v0.4 propagation envelope has an unresolved registry status. The propagation decision is correctly HELD; no deployment is permitted by this bundle."
+  }
+}
