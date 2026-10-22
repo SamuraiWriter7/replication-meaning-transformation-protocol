@@ -1,0 +1,340 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-propagation-bundle-v0.4.schema.json",
+  "title": "RMTP v0.4 Replication Propagation Verification Bundle",
+  "description": "Aggregates independently assessed lineage, propagation boundary, and replication budget results for a candidate replication plan. A PASS result indicates structural conformance only and never authorizes execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "lineage_graph_ref",
+    "propagation_envelope_ref",
+    "budget_ledger_ref",
+    "candidate_plan_ref",
+    "verification_time",
+    "lineage_result",
+    "boundary_result",
+    "budget_result",
+    "overall_result",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.4.0"
+    },
+    "bundle_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier of this propagation verification bundle."
+    },
+    "lineage_graph_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the replication lineage graph used for ancestry verification."
+    },
+    "propagation_envelope_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the externally issued propagation envelope."
+    },
+    "budget_ledger_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the budget ledger snapshot used for this assessment."
+    },
+    "candidate_plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the replication plan being evaluated. This must correspond to a valid v0.1-v0.2 proposal."
+    },
+    "verification_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time at which the combined propagation assessment is made."
+    },
+    "lineage_result": {
+      "$ref": "#/$defs/result",
+      "description": "Result of lineage identity, ancestry, and generation checks."
+    },
+    "boundary_result": {
+      "$ref": "#/$defs/result",
+      "description": "Result of propagation scope, authority, depth, population, and validity checks."
+    },
+    "budget_result": {
+      "$ref": "#/$defs/result",
+      "description": "Result of reserved, active, released, and shared-budget consistency checks."
+    },
+    "overall_result": {
+      "$ref": "#/$defs/result",
+      "description": "Aggregate result. FAIL overrides HELD, and HELD overrides PASS."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ],
+      "description": "Status of independent verification of the assessment."
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "external_registry",
+        "signed_attestation",
+        "trusted_test_fixture"
+      ]
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_records": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/verification_record"
+      },
+      "description": "Optional independently attributable verification records for each component."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "held_reasons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "lineage_unverified",
+          "authority_unverified",
+          "envelope_unknown",
+          "evidence_pending",
+          "budget_snapshot_stale",
+          "retirement_unconfirmed",
+          "resource_release_pending",
+          "external_review_pending",
+          "other"
+        ]
+      },
+      "description": "Unresolved reasons preventing a PASS decision."
+    },
+    "failure_reasons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "lineage_cycle",
+          "lineage_identity_mismatch",
+          "invalid_delegation",
+          "depth_limit_exceeded",
+          "total_descendant_limit_exceeded",
+          "active_descendant_limit_exceeded",
+          "budget_exceeded",
+          "duplicate_allocation",
+          "unverified_budget_release",
+          "envelope_expired",
+          "envelope_revoked",
+          "scope_violation",
+          "cross_plan_reference_mismatch",
+          "contradictory_evidence",
+          "other"
+        ]
+      },
+      "description": "Known violations producing a FAIL result."
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "A propagation verification bundle MUST NOT authorize execution."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "HELD"
+      ]
+    },
+    "verification_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "component",
+        "result",
+        "verifier_id",
+        "evidence_refs",
+        "verified_at"
+      ],
+      "properties": {
+        "record_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "component": {
+          "type": "string",
+          "enum": [
+            "lineage",
+            "boundary",
+            "budget"
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "properties": {
+          "lineage_result": {
+            "const": "PASS"
+          },
+          "boundary_result": {
+            "const": "PASS"
+          },
+          "budget_result": {
+            "const": "PASS"
+          },
+          "verification_status": {
+            "const": "verified"
+          },
+          "failure_reasons": {
+            "maxItems": 0
+          },
+          "held_reasons": {
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "verification_status",
+          "verification_method",
+          "verifier_id",
+          "verification_ref",
+          "verification_records"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "FAIL"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "required": [
+          "failure_reasons"
+        ],
+        "properties": {
+          "failure_reasons": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "HELD"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "required": [
+          "held_reasons"
+        ],
+        "properties": {
+          "held_reasons": {
+            "minItems": 1
+          },
+          "failure_reasons": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_method",
+          "verifier_id",
+          "verification_ref"
+        ]
+      }
+    }
+  ]
+}
