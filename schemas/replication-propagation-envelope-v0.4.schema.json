@@ -1,0 +1,238 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-propagation-envelope-v0.4.schema.json",
+  "title": "RMTP v0.4 Replication Propagation Envelope",
+  "description": "Defines externally issued boundaries for multi-generation AI agent replication. The envelope constrains propagation but never grants replication, delegation, deployment, or execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "envelope_id",
+    "root_agent_id",
+    "issuer_id",
+    "authority_ref",
+    "allowed_scope",
+    "max_depth",
+    "max_total_descendants",
+    "max_active_descendants",
+    "valid_from",
+    "valid_until",
+    "revocation_status",
+    "verification_reference",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.4.0"
+    },
+    "envelope_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier of this propagation envelope."
+    },
+    "root_agent_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Root identity of the replication lineage governed by this envelope."
+    },
+    "issuer_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "External principal issuing the propagation boundary. Actual issuer authority must be independently verified."
+    },
+    "authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to an applicable external authority record. This reference does not establish delegation or execution permission."
+    },
+    "allowed_scope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Scopes within which propagation proposals may be evaluated."
+    },
+    "max_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Maximum permitted generation depth measured from the root at depth zero. A value of zero prohibits descendants."
+    },
+    "max_total_descendants": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Maximum number of distinct descendant identities admitted during the envelope's lifetime. Retired descendants remain counted."
+    },
+    "max_active_descendants": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000,
+      "description": "Maximum number of concurrently active descendant slots under the envelope. Unverified retirement does not release an active slot."
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Start of the propagation boundary's validity interval."
+    },
+    "valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exclusive end of the propagation boundary's validity interval."
+    },
+    "revocation_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "revoked",
+        "unknown"
+      ],
+      "description": "Declared envelope status. Unknown or non-active status cannot support a new PASS propagation decision."
+    },
+    "verification_reference": {
+      "$ref": "#/$defs/verification_reference",
+      "description": "Evidence reference used to authenticate the envelope. Synthetic test references do not establish production trust."
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ],
+      "description": "Status of independent envelope verification."
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the independent verification assessment."
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp at which the envelope was issued."
+    },
+    "parent_envelope_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional reference to a more restrictive parent envelope. It does not itself establish authority delegation."
+    },
+    "budget_ledger_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional reference to a shared replication budget ledger."
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "A propagation envelope never grants execution authority."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "verification_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "value"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "signed_receipt",
+            "external_attestation",
+            "registry_reference",
+            "trusted_test_fixture"
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/identifier"
+        },
+        "issuer_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "enum": [
+                  "signed_receipt",
+                  "external_attestation"
+                ]
+              }
+            },
+            "required": [
+              "method"
+            ]
+          },
+          "then": {
+            "required": [
+              "issuer_ref"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "max_depth": {
+            "const": 0
+          }
+        },
+        "required": [
+          "max_depth"
+        ]
+      },
+      "then": {
+        "properties": {
+          "max_total_descendants": {
+            "const": 0
+          },
+          "max_active_descendants": {
+            "const": 0
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "max_active_descendants": {
+          "type": "integer"
+        }
+      }
+    }
+  ]
+}
