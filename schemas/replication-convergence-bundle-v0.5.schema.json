@@ -1,0 +1,592 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-convergence-bundle-v0.5.schema.json",
+  "title": "RMTP v0.5 Replication Convergence Bundle",
+  "description": "Aggregates independent convergence-plan, result-reconciliation, authority-separation and lifecycle verification results. Applies fail-closed precedence and prohibits implicit execution authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "convergence_plan_ref",
+    "reconciliation_record_ref",
+    "authority_separation_ref",
+    "lineage_graph_ref",
+    "retirement_receipt_refs",
+    "budget_ledger_ref",
+    "verification_time",
+    "plan_result",
+    "reconciliation_result",
+    "authority_result",
+    "lifecycle_result",
+    "overall_result",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "bundle_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique convergence assessment bundle identifier."
+    },
+    "convergence_plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a v0.5 Convergence Plan."
+    },
+    "reconciliation_record_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a v0.5 Result Reconciliation record."
+    },
+    "authority_separation_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a v0.5 Authority Separation record."
+    },
+    "lineage_graph_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to a v0.4 lineage graph."
+    },
+    "retirement_receipt_refs": {
+      "type": "array",
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Applicable v0.3 retirement receipts. An empty array is allowed for unresolved or assessment-only convergence; completion requires semantic verification."
+    },
+    "budget_ledger_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the verified v0.4 budget ledger."
+    },
+    "root_agent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "target_agent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "scope_mode": {
+      "type": "string",
+      "enum": [
+        "selected_descendants",
+        "entire_lineage"
+      ]
+    },
+    "descendant_dispositions": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/descendant_disposition"
+      },
+      "description": "Per-descendant reconciliation and lifecycle disposition records."
+    },
+    "plan_result": {
+      "$ref": "#/$defs/result"
+    },
+    "reconciliation_result": {
+      "$ref": "#/$defs/result"
+    },
+    "authority_result": {
+      "$ref": "#/$defs/result"
+    },
+    "lifecycle_result": {
+      "$ref": "#/$defs/result"
+    },
+    "budget_result": {
+      "$ref": "#/$defs/result",
+      "description": "Optional explicit budget verification result. If present, it participates in overall aggregation."
+    },
+    "lineage_result": {
+      "$ref": "#/$defs/result",
+      "description": "Optional explicit lineage-preservation verification result."
+    },
+    "overall_result": {
+      "$ref": "#/$defs/result"
+    },
+    "convergence_status": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "ASSESSING",
+        "PARTIAL",
+        "COMPLETED",
+        "REJECTED"
+      ]
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ]
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "external_attestation",
+        "independent_review",
+        "signed_evidence",
+        "trusted_test_fixture"
+      ]
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_records": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/verification_record"
+      }
+    },
+    "evidence_refs": {
+      "$ref": "#/$defs/evidence_refs"
+    },
+    "unresolved_refs": {
+      "type": "array",
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Outstanding mandatory result, lifecycle, authority or lineage obligations."
+    },
+    "recovery_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "prior_bundle_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "execution_authorized": {
+      "const": false,
+      "description": "The bundle is an assessment and MUST NOT authorize execution."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "HELD",
+        "FAIL"
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "descendant_disposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descendant_id",
+        "origin_plan_ref",
+        "lineage_ref",
+        "result_disposition",
+        "lifecycle_disposition",
+        "budget_disposition",
+        "verification_result"
+      ],
+      "properties": {
+        "descendant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "origin_plan_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "lineage_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "result_disposition": {
+          "type": "string",
+          "enum": [
+            "ACCEPTED",
+            "REJECTED",
+            "HELD",
+            "NOT_TRANSFERRED",
+            "NO_RESULT"
+          ]
+        },
+        "lifecycle_disposition": {
+          "type": "string",
+          "enum": [
+            "RETIRED",
+            "ACTIVE",
+            "TERMINATING",
+            "TRANSFERRED",
+            "UNRESOLVED"
+          ]
+        },
+        "retirement_receipt_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "custody_transfer_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Independent verification reference for a separately authorized transfer."
+        },
+        "budget_disposition": {
+          "type": "string",
+          "enum": [
+            "released_verified",
+            "allocated",
+            "reserved",
+            "release_pending",
+            "not_applicable"
+          ]
+        },
+        "verification_result": {
+          "$ref": "#/$defs/result"
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "unresolved_reason": {
+          "type": "string",
+          "maxLength": 1024
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "lifecycle_disposition": {
+                "const": "RETIRED"
+              }
+            },
+            "required": [
+              "lifecycle_disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "retirement_receipt_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle_disposition": {
+                "const": "TRANSFERRED"
+              }
+            },
+            "required": [
+              "lifecycle_disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "custody_transfer_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "budget_disposition": {
+                "const": "released_verified"
+              }
+            },
+            "required": [
+              "budget_disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "retirement_receipt_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verification_result": {
+                "const": "PASS"
+              }
+            },
+            "required": [
+              "verification_result"
+            ]
+          },
+          "then": {
+            "required": [
+              "verification_ref",
+              "verifier_id",
+              "evidence_refs"
+            ]
+          }
+        }
+      ]
+    },
+    "verification_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "component",
+        "result",
+        "verifier_id",
+        "verified_at",
+        "evidence_refs",
+        "verification_ref"
+      ],
+      "properties": {
+        "record_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "component": {
+          "type": "string",
+          "enum": [
+            "plan",
+            "reconciliation",
+            "authority",
+            "lifecycle",
+            "budget",
+            "lineage"
+          ]
+        },
+        "result": {
+          "$ref": "#/$defs/result"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_method",
+          "verifier_id",
+          "verification_ref",
+          "evidence_refs"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_status",
+          "verification_method",
+          "verifier_id",
+          "verification_ref",
+          "evidence_refs",
+          "convergence_status",
+          "budget_result",
+          "lineage_result",
+          "descendant_dispositions"
+        ],
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          },
+          "convergence_status": {
+            "const": "COMPLETED"
+          },
+          "plan_result": {
+            "const": "PASS"
+          },
+          "reconciliation_result": {
+            "const": "PASS"
+          },
+          "authority_result": {
+            "const": "PASS"
+          },
+          "lifecycle_result": {
+            "const": "PASS"
+          },
+          "budget_result": {
+            "const": "PASS"
+          },
+          "lineage_result": {
+            "const": "PASS"
+          },
+          "descendant_dispositions": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "verification_result": {
+                  "const": "PASS"
+                },
+                "lifecycle_disposition": {
+                  "enum": [
+                    "RETIRED",
+                    "TRANSFERRED"
+                  ]
+                }
+              }
+            }
+          },
+          "unresolved_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "HELD"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "properties": {
+          "plan_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "reconciliation_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "authority_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "lifecycle_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "budget_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "lineage_result": {
+            "enum": [
+              "PASS",
+              "HELD"
+            ]
+          },
+          "convergence_status": {
+            "enum": [
+              "PLANNED",
+              "ASSESSING",
+              "PARTIAL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "overall_result": {
+            "const": "FAIL"
+          }
+        },
+        "required": [
+          "overall_result"
+        ]
+      },
+      "then": {
+        "properties": {
+          "convergence_status": {
+            "enum": [
+              "PLANNED",
+              "ASSESSING",
+              "PARTIAL",
+              "REJECTED"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "convergence_status": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "convergence_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "overall_result": {
+            "const": "PASS"
+          }
+        }
+      }
+    }
+  ]
+}
