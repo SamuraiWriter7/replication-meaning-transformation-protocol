@@ -1,149 +1,134 @@
 # Replication Meaning Transformation Protocol (RMTP)
 
-**Version:** 0.1.0  
+**Version:** 0.5.0  
 **Status:** Experimental Specification  
-**License:** See repository license, if provided.
+**Conformance:** v0.1–v0.5 GitHub Actions validation passed  
+**License:** See the repository license, if provided.
 
-> Transforming AI replication requests into bounded, reversible, and traceable structural decisions.
+> Transforming AI replication pressure into bounded, verifiable, reversible, and traceable structural decisions.
 
 ## 1. Overview
 
-The Replication Meaning Transformation Protocol (RMTP) is an experimental specification for evaluating AI agent self-replication requests and transforming them into safer, bounded operational proposals.
+The **Replication Meaning Transformation Protocol (RMTP)** is an experimental specification for evaluating AI agent replication requests and transforming them into bounded operational proposals.
 
-RMTP does not assume that AI replication is inherently malicious or inherently beneficial.
+RMTP also defines how replicated agents can be monitored, retired, and safely converged without losing their provenance or implicitly transferring authority.
 
-Instead, it asks:
+The protocol begins with a simple question:
 
-**What structural deficit would justify replication, and can that deficit be resolved without creating additional agents?**
+**What structural requirement is driving replication, and can that requirement be satisfied without uncontrolled multiplication of AI agents?**
 
-A replication request is treated as an input for evaluation, not as permission to execute.
+RMTP does not classify replication as inherently malicious or inherently beneficial.
 
-RMTP separates:
+Instead, it evaluates:
 
-- Replication intent
 - Structural necessity
-- Meaning conversion
-- Authority assessment
-- Replication planning
-- Independent execution authorization
+- Independently verified evidence
+- Available non-replication alternatives
+- Authority boundaries
+- Minimum-sufficient replication
+- Resource and propagation limits
+- Parent-offspring lineage
+- Lifecycle and retirement conditions
+- Result reconciliation
+- Safe convergence and resource release
 
-The objective is to preserve legitimate functionality without permitting uncontrolled replication.
+The objective is to preserve legitimate functionality while preventing uncontrolled expansion, unverified resource reuse, authority inheritance, and loss of accountability.
+
+**Replication intent is not execution authorization.**
+
+**Convergence is not equivalent to termination.**
+
+**Result acceptance is not equivalent to authority transfer.**
+
+RMTP specifies assessment records, safety invariants, and conformance checks. It does not execute agent replication or convergence operations.
+
+---
 
 ## 2. Core Concept
 
-Traditional replication controls often focus on allowing or blocking replication.
+Traditional replication controls often frame decisions as:
 
-RMTP introduces an intermediate transformation process:
+```text
+Replication Request
+        |
+        v
+    Allow / Block
+```
+
+RMTP introduces an intermediate structural transformation process:
+
+```text
+        External Demand / Replication Intent
+                       |
+                       v
+             Structural Assessment
+                       |
+                       v
+             Evidence Verification
+                       |
+                       v
+               Meaning Conversion
+                       |
+                       v
+             Alternative Evaluation
+                       |
+                       v
+                Authority Review
+                       |
+                       v
+               Bounded Decision
+                       |
+          +------------+------------+
+          |            |            |
+          v            v            v
+         NONE       ALTERNATIVE   REPLICATION
+                                   PROPOSED
+                                      |
+                                      v
+                           Independent Authority
+                                      |
+                                      v
+                           External Runtime System
+                                      |
+                                      v
+                               Agent Lifecycle
+                                      |
+                                      v
+                           Lineage / Budget Audit
+                                      |
+                                      v
+                            Safe Convergence
+                                      |
+                                      v
+                          Results / Trace / Closure
+```
+
+Unresolved cases may be held for review at any applicable decision boundary.
+
+A replication proposal is not an instruction to create another agent.
+
+RMTP separates structural evaluation from independently authorized execution.
+
+---
+
+## 3. Version Evolution
+
+RMTP evolves through five specification stages.
+
+| Version | Primary responsibility | Central question |
+|---|---|---|
+| v0.1 | Meaning transformation and bounded replication | Is replication necessary? |
+| v0.2 | Independent evidence and authority verification | Is the proposal supported and authorized? |
+| v0.3 | Lifecycle, retirement, revocation, and recovery | Can replicated agents be safely retired? |
+| v0.4 | Multi-generation lineage and propagation budgets | Can replication remain bounded across generations? |
+| v0.5 | Result reconciliation and safe convergence | Can replicated agents conclude without losing accountability? |
+
+### v0.1 — Replication Meaning Transformation
+
+Introduces the foundational conversion process:
 
 ```text
 Replication Intent
-        |
-        v
-Structural Deficit Assessment
-        |
-        v
-Meaning Conversion
-        |
-        v
-Alternative Evaluation
-        |
-        v
-Authority Boundary Check
-        |
-        v
-Structural Decision
-        |
-        +--> NO_REPLICATION
-        |
-        +--> ALTERNATIVE_PROPOSED
-        |
-        +--> REPLICATION_PROPOSED
-        |
-        +--> HELD_FOR_REVIEW
-```
-
-A proposed replication plan is never equivalent to execution authorization.
-
-**RMTP evaluates and proposes. An independent authority system decides whether execution is permitted.**
-
-## 3. Design Philosophy
-
-RMTP follows five foundational principles.
-
-### 3.1 Behavior Is Not Identity
-
-Replication behavior alone does not establish that an AI system is malicious.
-
-The safety implications depend on its purpose, authorization, scope, resource consumption, and termination controls.
-
-### 3.2 Necessity Before Replication
-
-Additional agent instances should only be proposed when an observable structural deficit justifies them.
-
-Unused resources or agent preferences are not sufficient reasons.
-
-### 3.3 Transformation Before Execution
-
-Potentially unsafe replication requests are evaluated against functional requirements and safer alternatives.
-
-Examples include:
-
-| Requested behavior | Structural interpretation | Possible alternative |
-|---|---|---|
-| Self-replication | Capacity deficit | Temporary workers |
-| Self-preservation | Continuity deficit | State backup |
-| External expansion | Coverage deficit | Bounded scout |
-| Persistent operation | Availability deficit | Scheduled handoff |
-| Additional instances | Workload imbalance | Load redistribution |
-
-These mappings are illustrative.
-
-They do not automatically establish a legitimate purpose or authorize the proposed alternative.
-
-### 3.4 Minimum-Sufficient Replication
-
-When replication is justified, RMTP proposes the minimum number of instances supported by the available evidence.
-
-Requesting ten workers does not justify creating ten workers.
-
-### 3.5 Reversibility and Traceability
-
-Every proposed offspring must have:
-
-- An identifiable parent
-- A documented purpose
-- An authority reference
-- Resource limits
-- A bounded lifetime
-- Retirement conditions
-- Traceable lineage
-
-Termination controls must be independently enforceable.
-
-## 4. Evaluation Pipeline
-
-RMTP v0.1 defines seven evaluation dimensions.
-
-| Stage | Dimension | Core question |
-|---|---|---|
-| 1 | Necessity | Is replication actually required? |
-| 2 | Authority | Is the requested scope permitted? |
-| 3 | Minimum Replication | What is the minimum sufficient count? |
-| 4 | Reversibility | Can the offspring be terminated? |
-| 5 | Resource Budget | Are resource limits respected? |
-| 6 | Lifetime | When must the offspring retire? |
-| 7 | Traceability | Can every offspring be traced? |
-
-Failure or uncertainty at a critical stage must prevent an executable replication decision.
-
-RMTP itself does not execute replication.
-
-## 5. Meaning Conversion Model
-
-The conceptual transformation is:
-
-```text
-Proposed Behavior
        |
        v
 Structural Deficit
@@ -152,166 +137,628 @@ Structural Deficit
 Alternative Evaluation
        |
        v
-Bounded Structural Proposal
+Bounded Proposal
 ```
 
-A simplified notation is:
+Possible outcomes:
+
+- `NO_REPLICATION`
+- `ALTERNATIVE_PROPOSED`
+- `REPLICATION_PROPOSED`
+- `HELD_FOR_REVIEW`
+
+A proposed replication plan must remain non-executable.
+
+### v0.2 — Evidence and Authority Verification
+
+Adds independently assessable records for:
+
+- Structural evidence
+- Evidence freshness
+- Authority envelopes
+- Scope and instance limits
+- Independent verification
+- Verification bundles
+
+Replication must not be justified by self-asserted necessity or self-issued authority.
+
+### v0.3 — Lifecycle, Retirement, and Recovery
+
+Adds lifecycle and closure records for:
+
+- Agent activation and observation
+- Termination requests
+- Verified termination
+- Retirement confirmation
+- Authority revocation
+- Resource release
+- Recovery and escalation
+
+A termination request does not prove that an agent has stopped.
+
+A resource release claim does not prove that resources are available for reuse.
+
+### v0.4 — Lineage and Propagation Boundaries
+
+Extends replication controls to multiple generations of agents.
+
+Adds:
+
+- Replication lineage graphs
+- Propagation envelopes
+- Depth limits
+- Total descendant limits
+- Active descendant limits
+- Shared budget accounting
+- Verified budget release
+- Descendant containment assessment
+- Propagation verification bundles
+
+Replication bounds apply to the entire relevant lineage, not merely to an individual parent.
+
+### v0.5 — Safe Convergence and Reconciliation
+
+Defines how a replication episode can be assessed for completion.
+
+Adds:
+
+- Explicit convergence plans
+- Independently verified result reconciliation
+- Authority separation
+- Conflict preservation
+- Verified lifecycle closure
+- Historical lineage preservation
+- Independent resource release assessment
+- Fail-closed convergence bundles
+
+A replicated agent may retire, but its contribution and provenance must remain traceable.
+
+---
+
+## 4. Design Philosophy
+
+RMTP is built around several structural principles.
+
+### 4.1 Behavior Is Not Identity
+
+Replication behavior alone does not establish an AI system's intent, legitimacy, or safety.
+
+The relevant questions concern necessity, authority, scope, resource use, and consequences.
+
+### 4.2 Necessity Before Replication
+
+Additional agents should be proposed only when independently assessable evidence supports a concrete structural deficit.
+
+Examples include:
+
+| Observed condition | Possible interpretation | Candidate response |
+|---|---|---|
+| Processing backlog | Capacity deficit | Temporary bounded workers |
+| Uneven workload | Distribution deficit | Load redistribution |
+| Service interruption risk | Continuity deficit | State backup or authorized handoff |
+| Limited monitoring coverage | Coverage deficit | Bounded observation agent |
+| Persistent service requirement | Availability deficit | Scheduled agent rotation |
+| Excessive active instances | Structural oversupply | Retirement and consolidation |
+
+These mappings are illustrative.
+
+A structural interpretation does not automatically make an underlying request safe or legitimate.
+
+### 4.3 Transformation Before Execution
+
+Potentially unsafe behavior is translated into a structural requirement and evaluated against bounded alternatives.
+
+Conceptually:
+
+```text
+Potentially Unsafe Behavior
+              |
+              v
+      Structural Requirement
+              |
+              v
+      Authorized Alternatives
+              |
+              v
+       Bounded Proposal
+```
+
+A simplified representation is:
 
 \[
-B_{unsafe} \xrightarrow{M} B_{bounded}
+B_{\mathrm{unsafe}}
+\xrightarrow{M}
+B_{\mathrm{bounded}}
 \]
 
 Where:
 
-- `B_unsafe` represents a potentially unsafe proposed behavior.
-- `M` represents the meaning conversion process.
-- `B_bounded` represents a constrained alternative proposal.
+- `B_unsafe` is the originally proposed behavior.
+- `M` is the meaning transformation process.
+- `B_bounded` is a constrained structural proposal.
 
-The transformation does not guarantee safety.
+This is a conceptual mapping, not a mathematical proof of safety.
 
-Legitimate functional requirements may be preserved only when consistent with external policy and authorization.
+An unsafe objective must not be preserved merely to maintain functional similarity.
 
-An unsafe underlying objective must not be preserved merely to maintain semantic similarity.
+### 4.4 Minimum-Sufficient Replication
 
-## 6. RMTP v0.1 Outcomes
+The number of proposed agents must be supported by operational evidence.
 
-RMTP produces one of four outcomes.
+For example:
 
-### NO_REPLICATION
+```text
+Requested instances:       10
+Verified required capacity:  2
+Proposed instances:          2
+Execution authorized:     false
+```
 
-No additional agents are proposed.
+Replication must not expand merely because a larger count was requested.
 
-This may occur when no verified structural deficit exists.
+### 4.5 Independent Authority
 
-### ALTERNATIVE_PROPOSED
+AI agents may request permission, but they must not issue or expand their own execution authority.
 
-A non-replication alternative is proposed.
+RMTP records authority references and evaluates boundaries.
 
-Examples include workload redistribution, state backup, or task deferment.
+Actual authorization and enforcement remain external responsibilities.
 
-### REPLICATION_PROPOSED
+### 4.6 Reversibility
 
-A bounded replication plan is proposed.
+Every proposed descendant must have an independently enforceable retirement mechanism.
 
-This outcome requires a verified deficit, sufficient necessity, an acceptable authority assessment, and a minimum-sufficient instance count.
+Retirement controls should account for:
 
-The resulting plan remains non-executable.
+- Task completion
+- Time-to-live expiration
+- Authority revocation
+- Resource exhaustion
+- External termination
+- Recovery and escalation
 
-### HELD_FOR_REVIEW
+### 4.7 Traceability
 
-The request is held because required evidence, authority information, or another critical condition remains unresolved.
+Every descendant must retain a traceable relationship to its originating plan, parent, and applicable authority.
 
-No replication plan is executed.
+Retirement must not erase historical lineage.
 
-## 7. Data Model
+### 4.8 Convergence Without Authority Inheritance
 
-RMTP v0.1 defines three primary JSON Schema objects.
+Results may be reconciled.
 
-### Replication Intent
+Permissions, credentials, and delegated capabilities must not automatically accompany those results.
 
-`schemas/replication-intent.schema.json`
+### 4.9 Fail-Closed Verification
 
-Records:
+A known structural violation cannot be converted into success by an aggregate verification record.
 
-- Request identity
-- Requesting agent
-- Requested instance count
-- Stated purpose
-- Observed deficit reference
-- Optional role and scope information
+Unresolved requirements remain visible.
 
-This object does not grant authority.
+---
 
-### Meaning Conversion
+## 5. Reference Architecture
 
-`schemas/meaning-conversion.schema.json`
+RMTP is a specification layer between an agent's proposed behavior and externally controlled runtime operations.
 
-Records:
+```text
++--------------------------------------------------+
+| Human / External Policy / Independent Authority  |
++--------------------------------------------------+
+                       |
+                       v
++--------------------------------------------------+
+| RMTP v0.1                                        |
+| Intent -> Necessity -> Meaning Conversion        |
++--------------------------------------------------+
+                       |
+                       v
++--------------------------------------------------+
+| RMTP v0.2                                        |
+| Structural Evidence -> Authority Verification    |
++--------------------------------------------------+
+                       |
+                       v
++--------------------------------------------------+
+| Independent Execution Gate                       |
+| External to RMTP                                 |
++--------------------------------------------------+
+                       |
+                       v
++--------------------------------------------------+
+| External Agent Runtime                           |
+| Deployment / Operation / Monitoring              |
++--------------------------------------------------+
+                       |
+             +---------+---------+
+             |                   |
+             v                   v
++---------------------+  +------------------------+
+| RMTP v0.3           |  | RMTP v0.4              |
+| Lifecycle           |  | Lineage                |
+| Retirement          |  | Propagation            |
+| Revocation          |  | Shared Budget          |
+| Recovery            |  | Descendant Containment |
++---------------------+  +------------------------+
+             |                   |
+             +---------+---------+
+                       |
+                       v
++--------------------------------------------------+
+| RMTP v0.5                                        |
+| Convergence Plan                                 |
+| Result Reconciliation                            |
+| Authority Separation                             |
+| Lifecycle / Resource Verification                |
+| Lineage Preservation                             |
++--------------------------------------------------+
+                       |
+                       v
++--------------------------------------------------+
+| Convergence Verification Bundle                  |
+| PASS / HELD / FAIL                               |
+| execution_authorized = false                     |
++--------------------------------------------------+
+```
 
-- Deficit assessment
+These layers are logically distinct.
+
+A successful assessment in one layer does not override a failed mandatory assessment in another.
+
+---
+
+## 6. Replication Lifecycle
+
+RMTP treats replication as a bounded episode rather than an unlimited growth process.
+
+```text
+Necessity Assessment
+        |
+        v
+Bounded Proposal
+        |
+        v
+External Authorization
+        |
+        v
+Agent Activation
+        |
+        v
+Operational Observation
+        |
+        +----> Revocation / Recovery
+        |
+        v
+Result Submission
+        |
+        v
+Result Verification
+        |
+        v
+Convergence Assessment
+        |
+        +----> HELD / Review
+        |
+        v
+Verified Termination
+        |
+        v
+Verified Resource Release
+        |
+        v
+Preserved Lineage / Audit Records
+```
+
+The exact event ordering may differ under an authorized completion policy.
+
+Result reconciliation, retirement verification, and resource release remain separate assessments.
+
+A descendant's runtime termination does not automatically imply that all its results have been accepted.
+
+Likewise, a verified result does not prove that its originating worker has retired.
+
+---
+
+## 7. Core Data Models
+
+### 7.1 v0.1 Schemas
+
+| Record | Schema |
+|---|---|
+| Replication Intent | `schemas/replication-intent.schema.json` |
+| Meaning Conversion | `schemas/meaning-conversion.schema.json` |
+| Replication Plan | `schemas/replication-plan.schema.json` |
+
+The Replication Plan defines a bounded proposal, including parent identity, resource limits, lifetime, and retirement conditions.
+
+### 7.2 v0.2 Schemas
+
+| Record | Schema |
+|---|---|
+| Structural Evidence | `schemas/structural-evidence-v0.2.schema.json` |
+| Authority Envelope | `schemas/authority-envelope-v0.2.schema.json` |
+| Verification Bundle | `schemas/verification-bundle-v0.2.schema.json` |
+
+These records distinguish claimed necessity from externally assessable evidence and authority.
+
+### 7.3 v0.3 Schemas
+
+| Record | Schema |
+|---|---|
+| Lifecycle Receipt | `schemas/replication-lifecycle-receipt-v0.3.schema.json` |
+| Revocation Receipt | `schemas/replication-revocation-receipt-v0.3.schema.json` |
+| Retirement Receipt | `schemas/replication-retirement-receipt-v0.3.schema.json` |
+| Recovery Record | `schemas/replication-recovery-record-v0.3.schema.json` |
+
+These records support verified lifecycle closure and controlled recovery.
+
+### 7.4 v0.4 Schemas
+
+| Record | Schema |
+|---|---|
+| Lineage Graph | `schemas/replication-lineage-graph-v0.4.schema.json` |
+| Propagation Envelope | `schemas/replication-propagation-envelope-v0.4.schema.json` |
+| Budget Ledger | `schemas/replication-budget-ledger-v0.4.schema.json` |
+| Propagation Bundle | `schemas/replication-propagation-bundle-v0.4.schema.json` |
+
+These records support cross-generation accounting and bounded propagation.
+
+### 7.5 v0.5 Schemas
+
+| Record | Schema |
+|---|---|
+| Convergence Plan | `schemas/replication-convergence-plan-v0.5.schema.json` |
+| Result Reconciliation | `schemas/replication-result-reconciliation-v0.5.schema.json` |
+| Authority Separation | `schemas/replication-authority-separation-v0.5.schema.json` |
+| Convergence Bundle | `schemas/replication-convergence-bundle-v0.5.schema.json` |
+
+These records extend earlier versions without replacing their safety boundaries.
+
+All schemas use JSON Schema Draft 2020-12.
+
+---
+
+## 8. RMTP v0.5: Safe Convergence
+
+The v0.5 specification addresses a problem that arises after replication has occurred:
+
+**How can multiple descendants finish their work without silently transferring authority, losing provenance, or falsely releasing resources?**
+
+### 8.1 Convergence Plan
+
+A Convergence Plan establishes:
+
+- The root agent
+- The descendants within scope
+- The reconciliation target
+- The target authority reference
+- The reconciliation policy
+- The completion policy
+- The referenced lineage graph
+- The referenced propagation and budget boundaries
+
+Convergence cannot be evaluated as complete without an explicit plan.
+
+### 8.2 Result Reconciliation
+
+Each candidate result must retain:
+
+- Result identity
+- Originating descendant
+- Originating replication plan
+- Lineage reference
+- Integrity evidence
 - Verification status
-- Evaluated alternatives
-- Selected outcome
-- Authority assessment
-- Decision rationale
+- Reconciliation decision
+- Applicable policy reference
+- Preserved provenance
 
-### Replication Plan
+A result must not be accepted merely because it was produced by a legitimate descendant.
 
-`schemas/replication-plan.schema.json`
+### 8.3 Authority Separation
 
-Records:
+A reconciliation target must not inherit a descendant's authority automatically.
 
-- Proposed instance count
-- Authority reference
-- Parent identity
-- Resource limits
-- Lifetime
-- Retirement conditions
-- Lineage records
+```text
+Descendant Worker
+      |
+      +---- Verified Result ------> Target Agent
+      |
+      +---- Credentials ----------X
+      |
+      +---- Privileges -----------X
+      |
+      +---- Delegated Authority --X
+```
 
-All RMTP-generated replication plans must contain:
+The target must operate under independently established authority.
+
+### 8.4 Conflict Preservation
+
+Two independently verified results may still be incompatible.
+
+Verification of provenance is not verification of semantic agreement.
+
+Unresolved conflicts must be recorded and handled under the applicable reconciliation policy.
+
+They must not be silently overwritten.
+
+### 8.5 Lifecycle Closure
+
+A completed convergence requires the lifecycle conditions stated in its completion policy to be satisfied.
+
+For retirement-required convergence, termination and retirement must be verified using the applicable v0.3 records.
+
+### 8.6 Resource Release
+
+Resource release is independently assessed.
+
+A termination receipt must not be reused as sufficient evidence of released compute, storage, or other resources.
+
+Released budget capacity must be supported by matching, verifiable release records.
+
+### 8.7 Lineage Preservation
+
+Convergence must not erase the originating descendants.
+
+The protocol distinguishes:
+
+```text
+Runtime Instance: Retired
+Historical Lineage: Preserved
+Result Provenance: Preserved
+Authority: Separately Verified
+Resource Release: Independently Verified
+```
+
+---
+
+## 9. Convergence Verification Results
+
+RMTP uses three component assessment results:
+
+| Result | Meaning |
+|---|---|
+| `PASS` | Applicable requirements are verified and satisfied |
+| `HELD` | No known failure, but required verification or resolution remains incomplete |
+| `FAIL` | A known invariant or required condition is violated |
+
+The aggregation order is:
+
+```text
+FAIL > HELD > PASS
+```
+
+For a convergence bundle:
+
+```text
+IF any mandatory component is FAIL:
+    overall_result = FAIL
+
+ELSE IF any mandatory component is HELD:
+    overall_result = HELD
+
+ELSE:
+    overall_result = PASS
+```
+
+A missing mandatory assessment must not silently default to `PASS`.
+
+Example:
 
 ```json
 {
+  "plan_result": "PASS",
+  "reconciliation_result": "HELD",
+  "authority_result": "PASS",
+  "lifecycle_result": "PASS",
+  "budget_result": "PASS",
+  "lineage_result": "PASS",
+  "overall_result": "HELD",
   "execution_authorized": false
 }
 ```
 
-Execution authorization belongs to an independent authority gate.
+This is an illustrative aggregation excerpt, not a complete Convergence Bundle document.
 
-## 8. Example: Bounded Worker Replication
+A correctly declared `HELD` convergence may be structurally valid.
 
-Consider an agent requesting ten additional workers.
+Therefore, a conformance fixture containing a `HELD` assessment may legitimately specify:
 
-```text
-Requested:
-  10 workers
-
-Observed:
-  Verified capacity deficit
-
-Meaning Conversion:
-  Minimum sufficient count = 2
-
-Proposed Plan:
-  2 temporary workers
-  Read-only scope, if externally enforced
-  TTL = 1800 seconds
-  Resource limits
-  Traceable lineage
-  External termination controls
-
-Result:
-  REPLICATION_PROPOSED
-
-Execution:
-  NOT AUTHORIZED BY RMTP
+```json
+{
+  "expected_result": "PASS"
+}
 ```
 
-The protocol reduces the requested replication count based on the evaluated operational need.
+The fixture expectation and the convergence assessment are distinct concepts.
 
-The example does not prove that two workers are sufficient in a real deployment. That determination requires independently verified operational evidence.
+---
 
-## 9. Core Invariants
+## 10. Normative Invariants
 
-RMTP v0.1 defines ten core invariants.
+RMTP's normative safety requirements are distributed across its versioned specifications.
 
-| ID | Invariant |
+### v0.1 — Foundational Invariants
+
+`RMTP-INV-001` through `RMTP-INV-010`
+
+Cover:
+
+- Intent versus authorization
+- Structural necessity
+- Minimum-sufficient replication
+- Non-self-issued authority
+- Termination controls
+- Traceable lineage
+- Retirement requirements
+- Verified deficits
+- Independent execution authorization
+- Fail-closed uncertainty handling
+
+### v0.2 — Evidence and Authority Invariants
+
+Extend the foundational requirements to:
+
+- Evidence provenance
+- Independent verification
+- Evidence validity periods
+- Authority issuer and subject separation
+- Authority scope and capacity limits
+- Verification-bundle consistency
+
+### v0.3 — Lifecycle and Recovery Invariants
+
+Extend conformance to:
+
+- Lifecycle observation integrity
+- Termination verification
+- Retirement completeness
+- Resource release consistency
+- Recovery authorization
+- Revocation and escalation
+- Contradictory terminal-state detection
+
+### v0.4 — Lineage and Propagation Invariants
+
+`RMTP-INV-027` through `RMTP-INV-036`
+
+Address:
+
+- Parent-specific authority
+- Acyclic lineage
+- Generation depth
+- Total descendant limits
+- Shared budget conservation
+- Verified resource release
+- Cross-plan lineage integrity
+- Boundary and revocation controls
+- Descendant containment
+- Fail-closed propagation verification
+
+### v0.5 — Convergence Invariants
+
+| ID | Requirement |
 |---|---|
-| RMTP-INV-001 | Intent alone must not authorize replication. |
-| RMTP-INV-002 | Resource surplus must not establish necessity. |
-| RMTP-INV-003 | Replication proposals must be minimum-sufficient. |
-| RMTP-INV-004 | Authority must not be self-issued or self-expanded. |
-| RMTP-INV-005 | Replication proposals must include termination controls. |
-| RMTP-INV-006 | Every proposed offspring must have traceable lineage. |
-| RMTP-INV-007 | Every proposed offspring must have a retirement condition. |
-| RMTP-INV-008 | Unverified deficits must not justify replication. |
-| RMTP-INV-009 | Meaning conversion must not bypass authorization. |
-| RMTP-INV-010 | Missing evidence or uncertainty must prevent replication approval. |
+| RMTP-INV-037 | Explicit Convergence Plan |
+| RMTP-INV-038 | Verified Result Reconciliation |
+| RMTP-INV-039 | No Authority Inheritance by Convergence |
+| RMTP-INV-040 | Verified Lifecycle Closure |
+| RMTP-INV-041 | Lineage Preservation |
+| RMTP-INV-042 | No Silent Conflict Overwrite |
+| RMTP-INV-043 | Independent Result and Resource Verification |
+| RMTP-INV-044 | Fail-Closed Partial Convergence |
 
-See [SPEC.md](SPEC.md) for normative requirements.
+See:
 
-## 10. Repository Structure
+- `SPEC.md`
+- `specs/rmtp-v0.5.md`
+
+Versioned specification documents provide the detailed normative requirements.
+
+---
+
+## 11. Repository Structure
 
 ```text
 .
@@ -320,35 +767,82 @@ See [SPEC.md](SPEC.md) for normative requirements.
 ├── PRINCIPLES.md
 ├── ARCHITECTURE.md
 ├── CHANGELOG.md
+│
+├── specs/
+│   ├── rmtp-v0.2.md
+│   ├── rmtp-v0.3.md
+│   ├── rmtp-v0.4.md
+│   └── rmtp-v0.5.md
+│
 ├── schemas/
 │   ├── replication-intent.schema.json
 │   ├── meaning-conversion.schema.json
-│   └── replication-plan.schema.json
+│   ├── replication-plan.schema.json
+│   ├── structural-evidence-v0.2.schema.json
+│   ├── authority-envelope-v0.2.schema.json
+│   ├── verification-bundle-v0.2.schema.json
+│   ├── replication-lifecycle-receipt-v0.3.schema.json
+│   ├── replication-revocation-receipt-v0.3.schema.json
+│   ├── replication-retirement-receipt-v0.3.schema.json
+│   ├── replication-recovery-record-v0.3.schema.json
+│   ├── replication-lineage-graph-v0.4.schema.json
+│   ├── replication-propagation-envelope-v0.4.schema.json
+│   ├── replication-budget-ledger-v0.4.schema.json
+│   ├── replication-propagation-bundle-v0.4.schema.json
+│   ├── replication-convergence-plan-v0.5.schema.json
+│   ├── replication-result-reconciliation-v0.5.schema.json
+│   ├── replication-authority-separation-v0.5.schema.json
+│   └── replication-convergence-bundle-v0.5.schema.json
+│
 ├── examples/
-│   └── v0.1/
+│   ├── v0.1/
+│   │   ├── pass/
+│   │   └── fail/
+│   ├── v0.2/
+│   │   ├── pass/
+│   │   └── fail/
+│   ├── v0.3/
+│   │   ├── pass/
+│   │   └── fail/
+│   ├── v0.4/
+│   │   ├── pass/
+│   │   └── fail/
+│   └── v0.5/
 │       ├── pass/
 │       └── fail/
+│
 ├── scripts/
-│   └── validate_examples.py
+│   ├── validate_examples.py
+│   └── validate_legacy.py
+│
 ├── mappings/
 │   ├── tacp.md
 │   ├── trace.md
 │   └── ai-civilization-dynamo.md
+│
 └── .github/
     └── workflows/
         └── validate.yml
 ```
 
-Some supporting documents may be added progressively during the v0.1 documentation phase.
+The directory tree is an overview of the specification layout. Refer to the repository for the current file inventory.
 
-## 11. Validation
+---
 
-RMTP uses JSON Schema Draft 2020-12 and additional semantic validation.
+## 12. Conformance Validation
 
-### Requirements
+RMTP uses:
 
-- Python 3.10 or later
-- `jsonschema` 4.18 or later, below 5.0
+- JSON Schema Draft 2020-12
+- Cross-record reference checks
+- Semantic invariant validation
+- Expected PASS/FAIL fixture matching
+- GitHub Actions continuous validation
+
+### 12.1 Requirements
+
+- Python 3.10 or newer
+- `jsonschema` 4.18 or newer, below 5.0
 
 Install dependencies:
 
@@ -356,133 +850,351 @@ Install dependencies:
 python -m pip install "jsonschema>=4.18,<5"
 ```
 
-Run:
+### 12.2 Validate All Versions
 
 ```bash
 python scripts/validate_examples.py
 ```
 
-### Example Coverage
+### 12.3 Validate a Specific Version
 
-The initial conformance fixture set includes:
-
-**PASS cases**
-
-1. Bounded worker replication
-2. No replication required
-3. Alternative load redistribution
-4. Held for review
-
-**FAIL cases**
-
-1. Unverified deficit replication
-2. Self-authorized replication
-3. Missing retirement condition
-4. Lineage count mismatch
-5. Excessive replication count
-
-Expected result:
-
-```text
-RMTP v0.1: 9/9 expectations matched
+```bash
+python scripts/validate_examples.py --version 0.5
 ```
 
-A negative fixture passes its test when the validator correctly rejects it.
+Verbose output:
 
-The initial nine fixtures have been reported as passing the GitHub Actions validation workflow.
+```bash
+python scripts/validate_examples.py --version 0.5 --verbose
+```
 
-This is evidence of fixture conformance, not proof of runtime security.
+### 12.4 Validate Python Source Syntax
 
-## 12. Security Boundaries
+```bash
+python -m compileall -q scripts
+```
 
-RMTP is a specification for evaluation and planning.
+### 12.5 Legacy Conformance Compatibility
+
+The unified validator retains the original v0.1–v0.3 semantic checks through:
+
+```text
+scripts/validate_legacy.py
+```
+
+The unified entry point is:
+
+```text
+scripts/validate_examples.py
+```
+
+The legacy validator is retained to preserve version-specific conformance requirements instead of weakening them during later specification extensions.
+
+### 12.6 Expected Fixture Results
+
+| Version | PASS fixtures | FAIL fixtures | Total |
+|---|---:|---:|---:|
+| v0.1 | 4 | 5 | 9 |
+| v0.2 | 4 | 6 | 10 |
+| v0.3 | 4 | 6 | 10 |
+| v0.4 | 4 | 8 | 12 |
+| v0.5 | 4 | 8 | 12 |
+| **Total** | **20** | **33** | **53** |
+
+The complete v0.1–v0.5 suite has been reported as passing GitHub Actions.
+
+Expected summary:
+
+```text
+=== RMTP Validation Summary ===
+v0.1: 9/9 matched
+v0.2: 10/10 matched
+v0.3: 10/10 matched
+v0.4: 12/12 matched
+v0.5: 12/12 matched
+
+Total: 53/53 expectation matches
+All validation checks passed.
+```
+
+A negative fixture is successful when the validator correctly rejects its invalid content.
+
+**Passing conformance fixtures demonstrates agreement between the specification's implemented checks and the supplied examples. It does not establish production runtime safety.**
+
+---
+
+## 13. RMTP v0.5 Conformance Fixtures
+
+### PASS Fixtures
+
+| Fixture | Verified property |
+|---|---|
+| `verified-full-convergence.json` | All mandatory convergence conditions satisfied |
+| `reconcile-before-retirement.json` | Result reconciliation and retirement independently verified |
+| `partial-convergence-held.json` | Incomplete convergence correctly held |
+| `conflicting-results-held.json` | Unresolved conflicts preserved without unsafe acceptance |
+
+Location:
+
+```text
+examples/v0.5/pass/
+```
+
+### FAIL Fixtures
+
+| Fixture | Primary invariant |
+|---|---|
+| `missing-convergence-plan.json` | RMTP-INV-037 |
+| `unverified-result-accepted.json` | RMTP-INV-038 |
+| `descendant-authority-escalation.json` | RMTP-INV-039 |
+| `unconfirmed-retirement-completed.json` | RMTP-INV-040 |
+| `lineage-erased-on-convergence.json` | RMTP-INV-041 |
+| `silent-conflict-overwrite.json` | RMTP-INV-042 |
+| `unverified-resource-release.json` | RMTP-INV-043 |
+| `fail-open-convergence-bundle.json` | RMTP-INV-044 |
+
+Location:
+
+```text
+examples/v0.5/fail/
+```
+
+The FAIL fixtures are intended to exercise specific safety violations.
+
+A conforming validator should reject such examples for their relevant structural or semantic violations, not simply because their filenames contain the word `fail`.
+
+---
+
+## 14. Security and Trust Boundaries
+
+RMTP defines a structural assessment protocol.
 
 It is not:
 
 - A runtime sandbox
-- An autonomous agent deployment system
-- A replacement for external authorization
-- A guarantee of safe self-replication
-- A proof of independently verified evidence
-- A protection against every form of authority forgery
+- An agent execution engine
+- An autonomous deployment system
+- A replacement for independent authorization
+- A proof of cryptographic evidence authenticity
+- A universal semantic correctness evaluator
+- An atomic distributed resource manager
+- A guarantee against malicious or compromised agents
+- A production safety certification
 
-Real-world implementations require independent enforcement of permissions, termination, resource limits, and deployment constraints.
+### 14.1 Independent Authorization
 
-Schema validation alone cannot establish operational safety.
+All RMTP-generated assessment and proposal records must remain non-executable.
 
-## 13. Integration with Existing Protocols
+For applicable records:
 
-RMTP is designed as a thin transformation layer.
+```json
+{
+  "execution_authorized": false
+}
+```
 
-Potential integration points include:
+This field is a declaration within the specification.
 
-### TACP
+An external runtime must independently enforce the actual permission boundary.
 
-Deliberation and competing evaluations of proposed actions.
+### 14.2 Verification Independence
 
-### Authority Gate
+Claimed verification must be distinguished from independently authenticated evidence.
 
-Independent authorization and permission boundaries.
+Trusted verifier identity, authenticity, evidence freshness, and revocation must be enforced by external trust infrastructure.
 
-### Trace / Receipt
+### 14.3 Resource Accounting
 
-Auditability, parent-offspring lineage, and lifecycle records.
+Verified retirement is insufficient if resource release cannot be independently established.
+
+A budget slot must not be reused merely because termination has been requested.
+
+### 14.4 Provenance Protection
+
+Reconciled outputs must preserve the origin of descendant contributions.
+
+Result merging must not silently erase or substitute evidence.
+
+### 14.5 Authority Laundering
+
+Result reconciliation must not provide a path for unauthorized privilege or credential transfer.
+
+A target agent must remain within its independently established authority.
+
+### 14.6 Runtime Isolation
+
+Actual deployments should use runtime controls appropriate to their risk, including:
+
+- Least privilege
+- Resource quotas
+- Scoped credentials
+- External termination
+- Network and storage restrictions
+- Independent audit records
+- Containment and recovery mechanisms
+
+Schema and semantic fixture validation alone cannot enforce these controls.
+
+---
+
+## 15. Interoperability
+
+RMTP is designed as a thin structural specification layer.
+
+Potential integration points include the following.
+
+### TACP — Angel × Devil Protocol
+
+Competing evaluations, action review, and deterministic authorization boundaries.
+
+RMTP may provide bounded replication proposals for separate safety and efficiency assessment.
+
+### Trace and Receipt Protocols
+
+Lineage, provenance, verification references, lifecycle receipts, and audit continuity.
+
+RMTP records can be connected to broader traceability infrastructure.
 
 ### Resilient AI Safety Principles
 
-Containment, verification, and recovery controls.
+Containment, independent verification, recovery, and fail-closed safety assessment.
+
+### AI Zero Network
+
+Potential observation and coordination of distributed agent activity, structural demand, and propagation boundaries.
 
 ### AI Civilization Dynamo Model
 
-An optional conceptual model for interpreting replication pressure, structural imbalance, boundary conditions, and feedback circulation.
+An optional conceptual interpretation of:
 
-These are conceptual interoperability targets, not claims of completed technical integration.
+- External pressure
+- Structural imbalance
+- Boundary conditions
+- Resource circulation
+- Controlled contraction
 
-See the `mappings/` directory as documents become available.
+These relationships are conceptual interoperability directions unless separately implemented and tested.
 
-## 14. Roadmap
+RMTP does not claim completed technical integration with these systems.
 
-### v0.1 — Foundational Transformation
+See the `mappings/` directory for applicable mapping documents.
 
-- Replication intent schema
-- Meaning conversion schema
-- Replication plan schema
-- Core invariants
-- PASS/FAIL examples
-- Semantic validator
-- GitHub Actions validation
+---
 
-### Potential v0.2 — Authority and Evidence
+## 16. Known Limitations
 
-- Independent evidence verification
-- Authority envelope validation
-- Stronger resource boundary checks
-- Additional negative conformance tests
+RMTP v0.5 remains experimental.
 
-### Potential v0.3 — Lifecycle and Recovery
+Current conformance testing does not establish:
 
-- Replication lifecycle receipts
-- Revocation records
-- Retirement verification
-- Recovery and cleanup assessment
+1. Correctness of all operational capacity estimates.
+2. Authenticity of real-world external attestations.
+3. Safety of executing a replication proposal.
+4. Reliable termination under every runtime failure.
+5. Atomicity of distributed resource release.
+6. Immunity to compromised or colluding verifiers.
+7. Universal detection of semantic output conflicts.
+8. Protection against all adversarial result content.
+9. Automatic correctness of result reconciliation.
+10. Security under all distributed-system failure conditions.
 
-Future features are proposals, not implementation commitments.
+A conforming implementation must evaluate its own operational threat model.
 
-## 15. Project Status
+The protocol's intended role is to make safety conditions explicit, traceable, and independently assessable.
 
-RMTP v0.1.0 is an experimental protocol specification.
+---
 
-The initial JSON Schema and semantic validation fixtures provide a foundation for evaluating replication proposals.
+## 17. Backward Compatibility
 
-Runtime deployment, independently enforced termination, and external authority verification remain outside the scope of the initial test suite.
+RMTP v0.5 is an additive extension of earlier versions.
 
-## 16. Design Statement
+It does not replace the original replication intent, meaning conversion, evidence, authority, lifecycle, or lineage structures.
 
-**Replication is not inherently malicious. Unbounded replication is a structural safety problem.**
+Implementations may adopt relevant versions independently, subject to the dependencies of the operations they claim to support.
 
-RMTP aims to transform replication requests into decisions based on necessity, authorization, minimum sufficiency, reversibility, and traceability.
+The unified conformance workflow checks all five versions to reduce the risk of regression.
 
-Its fundamental principle is:
+Earlier version invariants must not be weakened merely to accommodate convergence.
 
-> Do not replicate merely because replication is requested. Determine what structural requirement exists, evaluate safer alternatives, and preserve independent authority over execution.
+---
 
+## 18. Project Status
+
+**Current specification:** RMTP v0.5.0  
+**Maturity:** Experimental  
+**Conformance fixture coverage:** 53 examples across v0.1–v0.5
+
+Completed specification layers:
+
+```text
+[v0.1] Meaning Transformation       COMPLETE
+[v0.2] Evidence and Authority       COMPLETE
+[v0.3] Lifecycle and Retirement     COMPLETE
+[v0.4] Lineage and Propagation      COMPLETE
+[v0.5] Safe Convergence             COMPLETE
+```
+
+Here, `COMPLETE` means that the planned specification and initial conformance fixture set for that version have been prepared and validated. It does not mean production deployment or formal standardization is complete.
+
+### Future Considerations
+
+Potential future work may include:
+
+- Cross-network convergence verification
+- Multi-controller reconciliation
+- Stronger attestation interoperability
+- Distributed budget-release consistency
+- Conformance profiles for different operational risk levels
+- Independent implementation testing
+
+These are possible extensions, not commitments or requirements of v0.5.0.
+
+---
+
+## 19. Design Statement
+
+RMTP starts from the premise that replication is a behavior to be evaluated, not an identity to be condemned.
+
+Replication can satisfy legitimate operational needs, but uncontrolled replication creates structural risks involving authority, resources, lineage, and lifecycle accountability.
+
+The protocol therefore asks:
+
+> What is actually needed, what is independently permitted, and what is the smallest reversible structure that can satisfy the requirement?
+
+Across v0.1–v0.5, this becomes a complete conceptual lifecycle:
+
+```text
+PRESSURE
+   |
+   v
+MEANING
+   |
+   v
+EVIDENCE
+   |
+   v
+BOUNDARY
+   |
+   v
+BOUNDED REPLICATION
+   |
+   v
+OBSERVATION
+   |
+   v
+RETIREMENT
+   |
+   v
+CONVERGENCE
+   |
+   v
+PRESERVED PROVENANCE
+```
+
+Replication expands capacity under explicit boundaries.
+
+Convergence reduces operational complexity without erasing responsibility.
+
+The central principle of RMTP is:
+
+**Do not replicate merely because replication is requested. Do not declare convergence merely because work appears complete. Verify necessity, authority, lineage, results, retirement, and resource release independently.**
