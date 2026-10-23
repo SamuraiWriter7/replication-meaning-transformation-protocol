@@ -1,0 +1,451 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-convergence-plan-v0.5.schema.json",
+  "title": "RMTP v0.5 Replication Convergence Plan",
+  "description": "Defines an explicit, bounded and auditable convergence plan for replicated AI descendants. Plan validation is not execution authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "convergence_plan_id",
+    "root_agent_id",
+    "lineage_graph_ref",
+    "propagation_envelope_ref",
+    "budget_ledger_ref",
+    "target_agent_id",
+    "target_authority_ref",
+    "descendant_refs",
+    "reconciliation_policy",
+    "completion_policy",
+    "requested_at",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "convergence_plan_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Unique identifier of this convergence plan."
+    },
+    "root_agent_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Root of the replication lineage being converged."
+    },
+    "lineage_graph_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the RMTP v0.4 lineage graph."
+    },
+    "propagation_envelope_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the RMTP v0.4 propagation envelope."
+    },
+    "budget_ledger_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to the RMTP v0.4 budget ledger snapshot."
+    },
+    "target_agent_id": {
+      "$ref": "#/$defs/identifier",
+      "description": "Intended result reconciliation recipient. This designation grants no authority."
+    },
+    "target_authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Independently issued authority record applicable to the reconciliation target."
+    },
+    "descendant_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Explicit identities of all descendants included in the convergence assessment."
+    },
+    "scope_mode": {
+      "type": "string",
+      "enum": [
+        "selected_descendants",
+        "entire_lineage"
+      ],
+      "default": "selected_descendants",
+      "description": "Whether the plan covers selected descendants or claims the entire lineage. Completeness requires semantic validation."
+    },
+    "reconciliation_policy": {
+      "$ref": "#/$defs/reconciliation_policy"
+    },
+    "completion_policy": {
+      "$ref": "#/$defs/completion_policy"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requested_by": {
+      "$ref": "#/$defs/identifier"
+    },
+    "plan_status": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "ASSESSING",
+        "PARTIAL",
+        "COMPLETED",
+        "REJECTED"
+      ],
+      "description": "Declared convergence lifecycle state, subject to independent verification."
+    },
+    "plan_verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ]
+    },
+    "plan_verification_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_refs": {
+      "$ref": "#/$defs/evidence_refs"
+    },
+    "prior_convergence_plan_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Previous convergence plan when this plan supersedes an earlier assessment."
+    },
+    "recovery_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Optional reference to an existing recovery process for unresolved descendants."
+    },
+    "execution_authorized": {
+      "type": "boolean",
+      "const": false,
+      "description": "The convergence plan MUST NOT authorize termination, transfer, resource release, or replication."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "reconciliation_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "result_handling",
+        "conflict_handling",
+        "preserve_provenance"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "verified_only",
+            "human_review_required",
+            "conflict_hold",
+            "no_result_transfer"
+          ]
+        },
+        "result_handling": {
+          "type": "string",
+          "enum": [
+            "accept_verified",
+            "review_before_acceptance",
+            "hold_all",
+            "do_not_transfer"
+          ]
+        },
+        "conflict_handling": {
+          "type": "string",
+          "enum": [
+            "hold",
+            "authorized_deterministic_resolution"
+          ]
+        },
+        "conflict_policy_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Required when automatic deterministic conflict resolution is selected."
+        },
+        "preserve_provenance": {
+          "const": true,
+          "description": "Convergence MUST preserve originating result and descendant provenance."
+        },
+        "result_scope_refs": {
+          "type": "array",
+          "maxItems": 1000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "description": "Optional set of result identifiers expected to be reconciled."
+        },
+        "reviewer_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "conflict_handling": {
+                "const": "authorized_deterministic_resolution"
+              }
+            },
+            "required": [
+              "conflict_handling"
+            ]
+          },
+          "then": {
+            "required": [
+              "conflict_policy_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "verified_only"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "result_handling": {
+                "const": "accept_verified"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "human_review_required"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "required": [
+              "reviewer_ref"
+            ],
+            "properties": {
+              "result_handling": {
+                "const": "review_before_acceptance"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "conflict_hold"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "result_handling": {
+                "const": "hold_all"
+              },
+              "conflict_handling": {
+                "const": "hold"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "no_result_transfer"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "result_handling": {
+                "const": "do_not_transfer"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "completion_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "require_lineage_preservation",
+        "require_authority_separation",
+        "require_budget_consistency"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "verified_retirement_required",
+            "verified_retirement_or_authorized_transfer",
+            "assessment_only"
+          ]
+        },
+        "require_lineage_preservation": {
+          "const": true
+        },
+        "require_authority_separation": {
+          "const": true
+        },
+        "require_budget_consistency": {
+          "const": true
+        },
+        "require_result_resolution": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether all mandatory result decisions must be resolved for completed convergence."
+        },
+        "allow_rejected_results": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_not_transferred_results": {
+          "type": "boolean",
+          "default": false
+        },
+        "receiving_controller_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Controller that independently accepts custody of any authorized transferred descendant."
+        },
+        "transfer_authority_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Explicit authority permitting the specified custody transfer."
+        },
+        "transfer_verification_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Evidence of independently verified responsibility transfer."
+        },
+        "retirement_policy_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional reference to an applicable RMTP v0.3 retirement policy."
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "verified_retirement_or_authorized_transfer"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "description": "Transfer fields are required only when an actual custody transfer is claimed. This is checked semantically against individual descendant dispositions."
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "plan_verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "plan_verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "plan_verification_ref",
+          "verifier_id",
+          "verification_time",
+          "evidence_refs"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "plan_status": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "plan_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "plan_verification_status",
+          "plan_verification_ref",
+          "verification_time"
+        ],
+        "properties": {
+          "plan_verification_status": {
+            "const": "verified"
+          },
+          "completion_policy": {
+            "properties": {
+              "mode": {
+                "enum": [
+                  "verified_retirement_required",
+                  "verified_retirement_or_authorized_transfer"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
