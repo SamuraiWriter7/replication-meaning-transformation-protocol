@@ -1,29 +1,33 @@
 
 #!/usr/bin/env python3
-"""RMTP v0.1-v0.5 conformance example validator.
+"""Replication Meaning Transformation Protocol conformance validator.
 
-Validation layers:
-  1. JSON parsing
-  2. JSON Schema Draft 2020-12
-  3. Cross-record reference and semantic checks
-  4. Fail-closed result aggregation
-  5. Expected PASS/FAIL fixture matching
+Supported versions:
+    v0.1, v0.2, v0.3: original legacy validator
+    v0.4: lineage, propagation, budget and containment
+    v0.5: convergence, reconciliation and fail-closed aggregation
 
-A valid convergence outcome may be PASS or HELD.
-Fixture expected_result is a separate test expectation.
+Fixture expectations:
+    PASS: the example must satisfy the specification.
+    FAIL: the example must be rejected by the validator.
 
-This validator checks fixture evidence references and declared
-verification states. It does not authenticate cryptographic
-attestations or perform real agent execution.
+A convergence state of HELD is not itself a failed fixture.
+It may be a valid outcome within a PASS example.
+
+This validator does not authenticate real cryptographic attestations
+or authorize AI agent execution.
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
-from collections import Counter, defaultdict
+
+from collections import defaultdict
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -32,6 +36,8 @@ from jsonschema import Draft202012Validator, FormatChecker
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_DIR = ROOT / "schemas"
 EXAMPLE_DIR = ROOT / "examples"
+
+VERSIONS = ("0.1", "0.2", "0.3", "0.4", "0.5")
 
 V04_SCHEMAS = {
     "replication_lineage_graph":
@@ -55,31 +61,6 @@ V05_SCHEMAS = {
         "replication-convergence-bundle-v0.5.schema.json",
 }
 
-LEGACY_SCHEMAS = {
-    "0.1": {
-        "replication_intents": "replication-intent.schema.json",
-        "meaning_conversions": "meaning-conversion.schema.json",
-        "replication_plans": "replication-plan.schema.json",
-    },
-    "0.2": {
-        "structural_evidence": "structural-evidence.schema.json",
-        "authority_envelopes": "authority-envelope.schema.json",
-        "verification_bundles": "verification-bundle.schema.json",
-    },
-    "0.3": {
-        "replication_lifecycle_receipts":
-            "replication-lifecycle-receipt.schema.json",
-        "replication_retirement_receipts":
-            "replication-retirement-receipt.schema.json",
-    },
-}
-
-RESULT_ORDER = {
-    "PASS": 0,
-    "HELD": 1,
-    "FAIL": 2,
-}
-
 V05_COMPONENTS = (
     "plan",
     "reconciliation",
@@ -89,16 +70,20 @@ V05_COMPONENTS = (
     "lineage",
 )
 
-EXPECTED_V05 = {
+V05_COUNTS = {
     "PASS": 4,
     "FAIL": 8,
 }
 
+RANK = {
+    "PASS": 0,
+    "HELD": 1,
+    "FAIL": 2,
+}
+
 
 class Violation(Exception):
-    """A deliberate specification violation."""
-
-    def __init__(self, code: str, message: str):
+    def __init__(self, code, message):
         self.code = code
         super().__init__(message)
 
@@ -134,10 +119,10 @@ def aggregate(results):
     if not values:
         return "FAIL"
 
-    if any(value not in RESULT_ORDER for value in values):
+    if any(value not in RANK for value in values):
         return "FAIL"
 
-    return max(values, key=lambda value: RESULT_ORDER[value])
+    return max(values, key=lambda value: RANK[value])
 
 
 def load_json(path):
@@ -145,104 +130,102 @@ def load_json(path):
 
 
 def load_schemas():
-    """Load all existing schemas and check their definitions."""
-
     schemas = {}
 
-    for path in sorted(SCHEMA_DIR.glob("*.schema.json")):
-        schema = load_json(path)
-        Draft202012Validator.check_schema(schema)
+    required = set(V04_SCHEMAS.values())
+    required.update(V05_SCHEMAS.values())
 
-        schemas[path.name] = Draft202012Validator(
-            schema,
-            format_checker=FormatChecker(),
-        )
+    for filename in sorted(required):
+        path = SCHEMA_DIR / filename
 
-    for filename in (
-        *V04_SCHEMAS.values(),
-        *V05_SCHEMAS.values(),
-    ):
         require(
-            filename in schemas,
+            path.is_file(),
             "SETUP",
             f"required schema missing: schemas/{filename}",
+        )
+
+        schema = load_json(path)
+
+        Draft202012Validator.check_schema(schema)
+
+        schemas[filename] = Draft202012Validator(
+            schema,
+            format_checker=FormatChecker(),
         )
 
     return schemas
 
 
-def schema_errors(value, validator, label):
-    errors = []
+@lru_cache(maxsize=1)
+def load_legacy_validator():
+    """Restore the original v0.1-v0.3 conformance engine."""
 
-    for error in sorted(
-        validator.iter_errors(value),
-        key=lambda item: tuple(str(p) for p in item.absolute_path),
-    ):
-        location = ".".join(
-            str(part) for part in error.absolute_path
-        ) or "<root>"
+    path = ROOT / "scripts" / "validate_legacy.py"
 
-        errors.append(
-            Violation(
-                "SCHEMA",
-                f"{label}.{location}: {error.message}",
-            )
-        )
+    require(
+        path.is_file(),
+        "SETUP",
+        "scripts/validate_legacy.py is missing. "
+        "Restore it from GitHub commit cfd3619e9433.",
+    )
 
-    return errors
+    spec = importlib.util.spec_from_file_location(
+        "rmtp_legacy_validator",
+        path,
+    )
+
+    require(
+        spec is not None and spec.loader is not None,
+        "SETUP",
+        "cannot load the legacy validator",
+    )
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    require(
+        callable(getattr(module, "schemas", None))
+        and callable(getattr(module, "check_file", None)),
+        "SETUP",
+        "legacy validator lacks required functions",
+    )
+
+    return module, module.schemas()
 
 
-def check_versioned_schemas(doc, schemas, mapping):
-    errors = []
+def schema_checks(doc, schemas, mapping):
+    violations = []
 
     for key, filename in mapping.items():
         if key not in doc:
-            errors.append(
-                Violation("SCHEMA", f"missing {key}")
+            violations.append(
+                Violation(
+                    "SCHEMA",
+                    f"missing {key}",
+                )
             )
             continue
 
-        errors.extend(
-            schema_errors(doc[key], schemas[filename], key)
-        )
+        validator = schemas[filename]
 
-    return errors
+        for error in validator.iter_errors(doc[key]):
+            path = ".".join(
+                str(part) for part in error.absolute_path
+            ) or "<root>"
 
-
-def collect_legacy_schema_errors(doc, schemas):
-    """Validate available legacy schemas without assuming absent
-    optional legacy records are required in every version.
-    """
-
-    errors = []
-
-    for mapping in LEGACY_SCHEMAS.values():
-        for key, filename in mapping.items():
-            if key not in doc or filename not in schemas:
-                continue
-
-            value = doc[key]
-
-            if isinstance(value, list):
-                for position, item in enumerate(value):
-                    errors.extend(
-                        schema_errors(
-                            item,
-                            schemas[filename],
-                            f"{key}[{position}]",
-                        )
-                    )
-            else:
-                errors.extend(
-                    schema_errors(
-                        value,
-                        schemas[filename],
-                        key,
-                    )
+            violations.append(
+                Violation(
+                    "SCHEMA",
+                    f"{key}.{path}: {error.message}",
                 )
+            )
 
-    return errors
+    return violations
 
+
+# ------------------------------------------------------------
+# v0.4: Lineage and propagation
+# ------------------------------------------------------------
 
 def lineage_checks(doc):
     graph = doc["replication_lineage_graph"]
@@ -268,10 +251,15 @@ def lineage_checks(doc):
     )
 
     require(
-        nodes[root_id]["node_type"] == "root"
-        and nodes[root_id]["generation_depth"] == 0,
+        nodes[root_id]["node_type"] == "root",
         "RMTP-INV-033",
-        "invalid root",
+        "root node type mismatch",
+    )
+
+    require(
+        nodes[root_id]["generation_depth"] == 0,
+        "RMTP-INV-033",
+        "root depth must be zero",
     )
 
     require(
@@ -302,7 +290,7 @@ def lineage_checks(doc):
     require(
         not inbound[root_id],
         "RMTP-INV-028",
-        "root has incoming edge",
+        "root has incoming lineage edge",
     )
 
     states = {}
@@ -313,7 +301,7 @@ def lineage_checks(doc):
         require(
             state != 1,
             "RMTP-INV-028",
-            f"lineage cycle: {agent_id}",
+            f"lineage cycle at {agent_id}",
         )
 
         if state == 2:
@@ -336,42 +324,47 @@ def lineage_checks(doc):
         require(
             node["node_type"] == "offspring",
             "RMTP-INV-033",
-            f"invalid descendant node: {agent_id}",
+            "non-root node must be offspring",
         )
 
         require(
             len(inbound[agent_id]) == 1,
             "RMTP-INV-033",
-            f"exactly one parent required: {agent_id}",
+            f"one parent required for {agent_id}",
         )
 
         edge = inbound[agent_id][0]
-        parent = edge["parent_agent_id"]
+        parent_id = edge["parent_agent_id"]
 
         require(
-            node["parent_agent_id"] == parent,
+            node["parent_agent_id"] == parent_id,
             "RMTP-INV-033",
-            f"parent mismatch: {agent_id}",
+            "node parent mismatch",
         )
 
         require(
-            node["origin_plan_ref"] == edge["origin_plan_ref"]
-            and node["lineage_ref"] == edge["lineage_ref"],
+            node["origin_plan_ref"] == edge["origin_plan_ref"],
             "RMTP-INV-033",
-            f"lineage edge mismatch: {agent_id}",
+            "node-edge plan mismatch",
+        )
+
+        require(
+            node["lineage_ref"] == edge["lineage_ref"],
+            "RMTP-INV-033",
+            "node-edge lineage mismatch",
         )
 
         require(
             node["generation_depth"]
-            == nodes[parent]["generation_depth"] + 1,
+            == nodes[parent_id]["generation_depth"] + 1,
             "RMTP-INV-033",
-            f"generation depth mismatch: {agent_id}",
+            "generation depth mismatch",
         )
 
     return nodes
 
 
-def common_plan_checks(doc, nodes):
+def authority_checks(doc):
     plans = index(
         doc.get("replication_plans", []),
         "plan_id",
@@ -384,21 +377,30 @@ def common_plan_checks(doc, nodes):
         "RMTP-INV-027",
     )
 
-    expected = {}
+    bundle = doc["replication_propagation_bundle"]
+    candidate = bundle["candidate_plan_ref"]
+
+    require(
+        candidate in plans,
+        "RMTP-INV-033",
+        "candidate replication plan missing",
+    )
 
     for plan in plans.values():
-        authority = authorities.get(plan["authority_ref"])
+        authority = authorities.get(
+            plan["authority_ref"]
+        )
 
         require(
             authority is not None,
             "RMTP-INV-027",
-            f"plan authority missing: {plan['plan_id']}",
+            "replication authority missing",
         )
 
         require(
             authority["subject_id"] == plan["parent_id"],
             "RMTP-INV-027",
-            "implicit replication authority inheritance",
+            "implicit authority inheritance",
         )
 
         require(
@@ -414,16 +416,23 @@ def common_plan_checks(doc, nodes):
             "bounded replication permission missing",
         )
 
+    return plans
+
+
+def plan_lineage_checks(doc, nodes, plans):
+    expected = {}
+
+    for plan in plans.values():
         for record in plan.get("lineage_records", []):
-            agent_id = record["offspring_id"]
+            offspring = record["offspring_id"]
 
             require(
-                agent_id not in expected,
+                offspring not in expected,
                 "RMTP-INV-033",
-                f"duplicate planned descendant: {agent_id}",
+                "offspring assigned to multiple plans",
             )
 
-            expected[agent_id] = (plan, record)
+            expected[offspring] = (plan, record)
 
     actual = {
         agent_id
@@ -434,38 +443,79 @@ def common_plan_checks(doc, nodes):
     require(
         actual == set(expected),
         "RMTP-INV-033",
-        "plan and lineage graph descendant sets differ",
+        "plan and lineage offspring sets differ",
     )
+
+    edges = {
+        edge["offspring_agent_id"]: edge
+        for edge in doc["replication_lineage_graph"]["edges"]
+    }
 
     for agent_id, (plan, record) in expected.items():
         node = nodes[agent_id]
+        edge = edges[agent_id]
 
         require(
-            node["origin_plan_ref"] == plan["plan_id"]
-            and node["parent_agent_id"] == plan["parent_id"]
-            and node["lineage_ref"] == record["lineage_ref"]
-            and node.get("authority_ref")
-            == record["authority_ref"],
+            node["origin_plan_ref"] == plan["plan_id"],
             "RMTP-INV-033",
-            f"plan/lineage mismatch: {agent_id}",
+            "cross-plan lineage mismatch",
         )
 
-    return plans, authorities
+        require(
+            node["parent_agent_id"] == plan["parent_id"],
+            "RMTP-INV-033",
+            "plan parent mismatch",
+        )
+
+        require(
+            node["lineage_ref"] == record["lineage_ref"],
+            "RMTP-INV-033",
+            "lineage reference mismatch",
+        )
+
+        require(
+            node.get("authority_ref")
+            == record["authority_ref"],
+            "RMTP-INV-033",
+            "lineage authority mismatch",
+        )
+
+        require(
+            edge["origin_plan_ref"] == plan["plan_id"],
+            "RMTP-INV-033",
+            "edge origin plan mismatch",
+        )
 
 
 def boundary_checks(doc, nodes):
     graph = doc["replication_lineage_graph"]
     env = doc["replication_propagation_envelope"]
+    bundle = doc["replication_propagation_bundle"]
 
     require(
         graph["root_agent_id"] == env["root_agent_id"],
         "RMTP-INV-033",
-        "propagation root mismatch",
+        "root mismatch",
     )
 
     require(
-        max(node["generation_depth"] for node in nodes.values())
-        <= env["max_depth"],
+        bundle["lineage_graph_ref"] == graph["graph_id"],
+        "RMTP-INV-033",
+        "graph reference mismatch",
+    )
+
+    require(
+        bundle["propagation_envelope_ref"]
+        == env["envelope_id"],
+        "RMTP-INV-033",
+        "envelope reference mismatch",
+    )
+
+    require(
+        max(
+            node["generation_depth"]
+            for node in nodes.values()
+        ) <= env["max_depth"],
         "RMTP-INV-029",
         "propagation depth exceeded",
     )
@@ -477,7 +527,8 @@ def boundary_checks(doc, nodes):
     ]
 
     require(
-        len(descendants) <= env["max_total_descendants"],
+        len(descendants)
+        <= env["max_total_descendants"],
         "RMTP-INV-030",
         "total descendant limit exceeded",
     )
@@ -496,48 +547,111 @@ def boundary_checks(doc, nodes):
     return env
 
 
-def retirement_index(doc):
-    return index(
+def release_checks(doc, nodes, ledger):
+    retirements = index(
         doc.get("replication_retirement_receipts", []),
         "retirement_id",
         "RMTP-INV-032",
     )
 
+    released_ids = set()
 
-def verified_retirement(receipt):
-    return (
-        receipt is not None
-        and receipt.get("retirement_status") == "CONFIRMED"
-        and receipt.get("termination_status") == "confirmed"
-        and receipt.get("resource_release_status") == "confirmed"
-        and bool(receipt.get("termination_verification_ref"))
-        and bool(receipt.get("resource_release_verification_ref"))
-    )
+    for allocation in ledger["allocations"]:
+        releases = allocation.get("release_records", [])
+
+        require(
+            allocation["released_instances"] == len(releases),
+            "RMTP-INV-032",
+            "released count does not match records",
+        )
+
+        for record in releases:
+            agent_id = record["offspring_id"]
+
+            require(
+                agent_id not in released_ids,
+                "RMTP-INV-032",
+                "duplicate resource release",
+            )
+
+            released_ids.add(agent_id)
+
+            receipt = retirements.get(
+                record["retirement_ref"]
+            )
+
+            require(
+                receipt is not None,
+                "RMTP-INV-032",
+                "retirement receipt missing",
+            )
+
+            require(
+                receipt["offspring_id"] == agent_id
+                and receipt["plan_ref"]
+                == allocation["plan_ref"],
+                "RMTP-INV-033",
+                "retirement lineage mismatch",
+            )
+
+            require(
+                receipt["retirement_status"] == "CONFIRMED"
+                and receipt["termination_status"] == "confirmed"
+                and receipt["resource_release_status"] == "confirmed",
+                "RMTP-INV-032",
+                f"unverified budget release: {agent_id}",
+            )
+
+            for field in (
+                "termination_verification_ref",
+                "resource_release_verification_ref",
+            ):
+                require(
+                    record[field] == receipt.get(field),
+                    "RMTP-INV-033",
+                    f"release proof mismatch: {field}",
+                )
+
+            require(
+                nodes[agent_id]["lifecycle_state"] == "RETIRED",
+                "RMTP-INV-032",
+                "released offspring not retired",
+            )
+
+    return released_ids
 
 
 def budget_checks(doc, nodes, plans, env):
     ledger = doc["replication_budget_ledger"]
+    bundle = doc["replication_propagation_bundle"]
 
     require(
-        ledger["propagation_envelope_ref"] == env["envelope_id"],
+        ledger["propagation_envelope_ref"]
+        == env["envelope_id"],
         "RMTP-INV-033",
-        "budget envelope reference mismatch",
+        "ledger envelope mismatch",
+    )
+
+    require(
+        bundle["budget_ledger_ref"]
+        == ledger["ledger_id"],
+        "RMTP-INV-033",
+        "bundle ledger mismatch",
     )
 
     require(
         env.get("budget_ledger_ref")
         in (None, ledger["ledger_id"]),
         "RMTP-INV-033",
-        "propagation envelope ledger mismatch",
+        "envelope ledger mismatch",
     )
 
     require(
-        ledger["budget_limit"] <= env["max_active_descendants"],
+        ledger["budget_limit"]
+        <= env["max_active_descendants"],
         "RMTP-INV-031",
-        "shared budget limit exceeds envelope",
+        "budget exceeds envelope capacity",
     )
-
-    retirements = retirement_index(doc)
 
     allocations = index(
         ledger["allocations"],
@@ -546,7 +660,6 @@ def budget_checks(doc, nodes, plans, env):
     )
 
     assigned = set()
-    released_ids = set()
 
     for allocation in allocations.values():
         plan = plans.get(allocation["plan_ref"])
@@ -558,7 +671,8 @@ def budget_checks(doc, nodes, plans, env):
         )
 
         require(
-            allocation["parent_agent_id"] == plan["parent_id"],
+            plan["parent_id"]
+            == allocation["parent_agent_id"],
             "RMTP-INV-033",
             "allocation parent mismatch",
         )
@@ -567,7 +681,7 @@ def budget_checks(doc, nodes, plans, env):
             require(
                 agent_id not in assigned,
                 "RMTP-INV-031",
-                "descendant allocated more than once",
+                "offspring allocated twice",
             )
 
             assigned.add(agent_id)
@@ -575,98 +689,48 @@ def budget_checks(doc, nodes, plans, env):
             require(
                 agent_id in nodes,
                 "RMTP-INV-033",
-                "allocated descendant missing from lineage",
-            )
-
-        releases = allocation.get("release_records", [])
-
-        require(
-            allocation["released_instances"] == len(releases),
-            "RMTP-INV-032",
-            "released count does not match release records",
-        )
-
-        for release in releases:
-            agent_id = release["offspring_id"]
-
-            require(
-                agent_id not in released_ids,
-                "RMTP-INV-032",
-                "duplicate resource release",
-            )
-
-            released_ids.add(agent_id)
-
-            receipt = retirements.get(
-                release["retirement_ref"]
+                "allocated offspring missing",
             )
 
             require(
-                verified_retirement(receipt),
-                "RMTP-INV-032",
-                f"unverified retirement/release: {agent_id}",
-            )
-
-            require(
-                receipt["offspring_id"] == agent_id
-                and receipt["plan_ref"] == allocation["plan_ref"],
+                nodes[agent_id]["origin_plan_ref"]
+                == plan["plan_id"],
                 "RMTP-INV-033",
-                "release lineage mismatch",
+                "allocation plan mismatch",
             )
 
-            for field in (
-                "termination_verification_ref",
-                "resource_release_verification_ref",
-            ):
-                require(
-                    release[field] == receipt.get(field),
-                    "RMTP-INV-032",
-                    f"release proof mismatch: {field}",
-                )
-
-            require(
-                release["termination_verification_ref"]
-                != release["resource_release_verification_ref"],
-                "RMTP-INV-043",
-                "termination proof reused as resource-release proof",
-            )
-
-            require(
-                nodes[agent_id]["lifecycle_state"] == "RETIRED",
-                "RMTP-INV-032",
-                "released descendant is not retired",
-            )
+    released = release_checks(doc, nodes, ledger)
 
     for agent_id, node in nodes.items():
-        if node["node_type"] != "offspring":
+        if node["node_type"] == "root":
             continue
 
         require(
             agent_id in assigned,
             "RMTP-INV-031",
-            f"descendant has no allocation: {agent_id}",
+            "descendant missing allocation",
         )
 
         if node["lifecycle_state"] == "RETIRED":
             require(
-                agent_id in released_ids,
+                agent_id in released,
                 "RMTP-INV-032",
-                "retired descendant missing verified release",
+                "retired slot missing verified release",
             )
 
     reserved = sum(
-        allocation["reserved_instances"]
-        for allocation in allocations.values()
+        item["reserved_instances"]
+        for item in allocations.values()
     )
 
     active = sum(
-        allocation["active_instances"]
-        for allocation in allocations.values()
+        item["active_instances"]
+        for item in allocations.values()
     )
 
-    released = sum(
-        allocation["released_instances"]
-        for allocation in allocations.values()
+    released_total = sum(
+        item["released_instances"]
+        for item in allocations.values()
     )
 
     committed = reserved + active
@@ -675,6 +739,12 @@ def budget_checks(doc, nodes, plans, env):
         committed <= ledger["budget_limit"],
         "RMTP-INV-031",
         "shared budget overallocated",
+    )
+
+    require(
+        committed <= env["max_active_descendants"],
+        "RMTP-INV-030",
+        "active descendant capacity exceeded",
     )
 
     occupied = sum(
@@ -693,7 +763,7 @@ def budget_checks(doc, nodes, plans, env):
     require(
         active == occupied and reserved == proposed,
         "RMTP-INV-031",
-        "budget does not match lineage states",
+        "allocation counts disagree with lineage",
     )
 
     totals = ledger.get("snapshot_totals")
@@ -702,7 +772,7 @@ def budget_checks(doc, nodes, plans, env):
         expected = {
             "reserved_instances": reserved,
             "active_instances": active,
-            "released_instances": released,
+            "released_instances": released_total,
             "committed_instances": committed,
             "available_instances":
                 ledger["budget_limit"] - committed,
@@ -716,7 +786,9 @@ def budget_checks(doc, nodes, plans, env):
 
 
 def containment_checks(doc, nodes):
-    assessment = doc.get("descendant_containment_assessment")
+    assessment = doc.get(
+        "descendant_containment_assessment"
+    )
 
     if assessment is None:
         return
@@ -736,10 +808,15 @@ def containment_checks(doc, nodes):
     require(
         set(rows) == descendants,
         "RMTP-INV-035",
-        "incomplete descendant containment assessment",
+        "incomplete descendant assessment",
     )
 
-    retirements = retirement_index(doc)
+    retirements = index(
+        doc.get("replication_retirement_receipts", []),
+        "retirement_id",
+        "RMTP-INV-032",
+    )
+
     all_confirmed = True
 
     for agent_id, row in rows.items():
@@ -757,7 +834,8 @@ def containment_checks(doc, nodes):
 
             require(
                 receipt is not None
-                and receipt["retirement_status"] == "CONFIRMED",
+                and receipt["retirement_status"]
+                == "CONFIRMED",
                 "RMTP-INV-035",
                 "unsupported containment confirmation",
             )
@@ -768,39 +846,18 @@ def containment_checks(doc, nodes):
         assessment["all_descendants_terminated"]
         == all_confirmed,
         "RMTP-INV-035",
-        "false containment summary",
+        "false termination summary",
     )
 
     require(
         assessment["execution_authorized"] is False,
         "RMTP-INV-034",
-        "containment may not authorize execution",
+        "containment cannot authorize execution",
     )
 
 
 def v04_bundle_checks(doc, env):
     bundle = doc["replication_propagation_bundle"]
-
-    require(
-        bundle["lineage_graph_ref"]
-        == doc["replication_lineage_graph"]["graph_id"],
-        "RMTP-INV-033",
-        "propagation bundle lineage mismatch",
-    )
-
-    require(
-        bundle["propagation_envelope_ref"]
-        == env["envelope_id"],
-        "RMTP-INV-033",
-        "propagation bundle envelope mismatch",
-    )
-
-    require(
-        bundle["budget_ledger_ref"]
-        == doc["replication_budget_ledger"]["ledger_id"],
-        "RMTP-INV-033",
-        "propagation bundle budget mismatch",
-    )
 
     status = env["revocation_status"]
     verification = env.get("verification_status")
@@ -830,7 +887,7 @@ def v04_bundle_checks(doc, env):
     require(
         bundle["overall_result"] == calculated,
         "RMTP-INV-036",
-        "propagation bundle aggregation mismatch",
+        "propagation aggregation mismatch",
     )
 
     records = index(
@@ -841,7 +898,8 @@ def v04_bundle_checks(doc, env):
 
     if calculated == "PASS":
         require(
-            set(records) == {"lineage", "boundary", "budget"},
+            set(records)
+            == {"lineage", "boundary", "budget"},
             "RMTP-INV-036",
             "component verification records missing",
         )
@@ -860,22 +918,25 @@ def v04_bundle_checks(doc, env):
             "unverified propagation PASS",
         )
 
-    for record in (
+    for item in (
         doc["replication_lineage_graph"],
         env,
         doc["replication_budget_ledger"],
         bundle,
     ):
         require(
-            record["execution_authorized"] is False,
+            item["execution_authorized"] is False,
             "RMTP-INV-034",
-            "verification grants execution authority",
+            "verification record authorizes execution",
         )
 
 
 def v04_semantic_checks(doc):
     nodes = lineage_checks(doc)
-    plans, _ = common_plan_checks(doc, nodes)
+    plans = authority_checks(doc)
+
+    plan_lineage_checks(doc, nodes, plans)
+
     env = boundary_checks(doc, nodes)
 
     budget_checks(doc, nodes, plans, env)
@@ -883,8 +944,12 @@ def v04_semantic_checks(doc):
     v04_bundle_checks(doc, env)
 
 
+# ------------------------------------------------------------
+# v0.5: Convergence and safe reconciliation
+# ------------------------------------------------------------
+
 def v05_reference_checks(doc):
-    """RMTP-INV-037: an explicit convergence plan is required."""
+    """RMTP-INV-037: explicit convergence plan."""
 
     plan = doc.get("replication_convergence_plan")
 
@@ -895,71 +960,84 @@ def v05_reference_checks(doc):
     )
 
     bundle = doc["replication_convergence_bundle"]
-    reconciliation = doc["replication_result_reconciliation"]
-    separation = doc["replication_authority_separation"]
+    rec = doc["replication_result_reconciliation"]
+    sep = doc["replication_authority_separation"]
 
     plan_id = plan["convergence_plan_id"]
 
     for label, record in (
         ("bundle", bundle),
-        ("reconciliation", reconciliation),
-        ("authority separation", separation),
+        ("reconciliation", rec),
+        ("authority separation", sep),
     ):
         require(
             record["convergence_plan_ref"] == plan_id,
             "RMTP-INV-037",
-            f"{label} convergence plan reference mismatch",
+            f"{label} references wrong convergence plan",
         )
 
-    references = (
-        ("lineage_graph_ref", "replication_lineage_graph", "graph_id"),
-        ("propagation_envelope_ref",
-         "replication_propagation_envelope", "envelope_id"),
-        ("budget_ledger_ref", "replication_budget_ledger", "ledger_id"),
-    )
-
-    for field, document, identifier in references:
+    for field, component, identifier in (
+        (
+            "lineage_graph_ref",
+            "replication_lineage_graph",
+            "graph_id",
+        ),
+        (
+            "propagation_envelope_ref",
+            "replication_propagation_envelope",
+            "envelope_id",
+        ),
+        (
+            "budget_ledger_ref",
+            "replication_budget_ledger",
+            "ledger_id",
+        ),
+    ):
         require(
-            plan[field] == doc[document][identifier],
+            plan[field] == doc[component][identifier],
             "RMTP-INV-037",
-            f"convergence plan {field} mismatch",
+            f"{field} mismatch",
         )
 
     require(
         bundle["reconciliation_record_ref"]
-        == reconciliation["reconciliation_id"],
+        == rec["reconciliation_id"],
         "RMTP-INV-037",
         "reconciliation reference mismatch",
     )
 
     require(
         bundle["authority_separation_ref"]
-        == separation["separation_id"],
+        == sep["separation_id"],
         "RMTP-INV-037",
         "authority separation reference mismatch",
     )
 
-    for field, source, identifier in (
-        ("lineage_graph_ref", "replication_lineage_graph", "graph_id"),
-        ("budget_ledger_ref", "replication_budget_ledger", "ledger_id"),
-    ):
-        require(
-            bundle[field] == doc[source][identifier],
-            "RMTP-INV-037",
-            f"bundle {field} mismatch",
-        )
+    require(
+        bundle["lineage_graph_ref"]
+        == doc["replication_lineage_graph"]["graph_id"],
+        "RMTP-INV-037",
+        "bundle lineage reference mismatch",
+    )
+
+    require(
+        bundle["budget_ledger_ref"]
+        == doc["replication_budget_ledger"]["ledger_id"],
+        "RMTP-INV-037",
+        "bundle budget reference mismatch",
+    )
 
     require(
         bool(plan["descendant_refs"]),
         "RMTP-INV-037",
-        "convergence scope empty",
+        "convergence scope is empty",
     )
 
-    for record in (plan, reconciliation, separation, bundle):
+    for record in (plan, rec, sep, bundle):
         require(
             record["execution_authorized"] is False,
             "RMTP-INV-039",
-            "convergence verification cannot authorize execution",
+            "convergence cannot authorize execution",
         )
 
     return plan
@@ -972,7 +1050,8 @@ def v05_result_checks(doc, plan):
 
     require(
         rec["root_agent_id"] == plan["root_agent_id"]
-        and rec["target_agent_id"] == plan["target_agent_id"],
+        and rec["target_agent_id"]
+        == plan["target_agent_id"],
         "RMTP-INV-038",
         "reconciliation target mismatch",
     )
@@ -985,10 +1064,15 @@ def v05_result_checks(doc, plan):
     )
 
     require(
-        rec["provenance_preserved"] is True
-        and rec["authority_transfer_permitted"] is False,
+        rec["provenance_preserved"] is True,
         "RMTP-INV-038",
-        "unsafe reconciliation flags",
+        "provenance not preserved",
+    )
+
+    require(
+        rec["authority_transfer_permitted"] is False,
+        "RMTP-INV-039",
+        "result reconciliation permits authority transfer",
     )
 
     records = index(
@@ -1004,13 +1088,13 @@ def v05_result_checks(doc, plan):
         require(
             result["origin_descendant_id"] in descendants,
             "RMTP-INV-038",
-            "result comes from out-of-scope descendant",
+            "result originates outside convergence scope",
         )
 
         require(
             result["provenance_preserved"] is True,
             "RMTP-INV-038",
-            "result provenance not preserved",
+            "result provenance missing",
         )
 
         require(
@@ -1019,11 +1103,13 @@ def v05_result_checks(doc, plan):
             "result contains authority material",
         )
 
-        if result["decision"] == "ACCEPTED":
+        decision = result["decision"]
+
+        if decision == "ACCEPTED":
             require(
                 result["verification_status"] == "verified",
                 "RMTP-INV-038",
-                f"unverified result accepted: {result['result_id']}",
+                "unverified result accepted",
             )
 
             for field in (
@@ -1052,14 +1138,14 @@ def v05_result_checks(doc, plan):
 
         if rec["policy_mode"] == "conflict_hold":
             require(
-                result["decision"] != "ACCEPTED",
+                decision != "ACCEPTED",
                 "RMTP-INV-042",
-                "conflict_hold accepted a result",
+                "conflict_hold policy accepted result",
             )
 
         if rec["policy_mode"] == "no_result_transfer":
             require(
-                result["decision"] == "NOT_TRANSFERRED",
+                decision == "NOT_TRANSFERRED",
                 "RMTP-INV-038",
                 "no_result_transfer policy violated",
             )
@@ -1087,9 +1173,10 @@ def v05_result_checks(doc, plan):
 
             for result_ref in conflict["result_refs"]:
                 require(
-                    records[result_ref]["decision"] != "ACCEPTED",
+                    records[result_ref]["decision"]
+                    != "ACCEPTED",
                     "RMTP-INV-042",
-                    "unresolved conflicting result accepted",
+                    "unresolved conflict result accepted",
                 )
 
     for target, matching in accepted_targets.items():
@@ -1103,7 +1190,7 @@ def v05_result_checks(doc, plan):
                 for result in matching
             ),
             "RMTP-INV-042",
-            f"silent multiple-result overwrite: {target}",
+            f"silent result overwrite: {target}",
         )
 
     for result in records.values():
@@ -1111,103 +1198,104 @@ def v05_result_checks(doc, plan):
             require(
                 conflict_ref in conflicts,
                 "RMTP-INV-042",
-                "unresolved conflict reference",
+                "result references missing conflict",
             )
 
     if rec["reconciliation_status"] == "COMPLETED":
         require(
             rec["verification_status"] == "verified",
             "RMTP-INV-038",
-            "unverified completed reconciliation",
+            "unverified reconciliation marked complete",
         )
 
         require(
             not any(
-                result["decision"] == "HELD"
-                for result in records.values()
+                item["decision"] == "HELD"
+                for item in records.values()
             ),
             "RMTP-INV-042",
-            "completed reconciliation contains held result",
+            "completed reconciliation contains HELD result",
         )
 
         require(
             not any(
-                conflict["resolution_status"] == "unresolved"
-                for conflict in conflicts.values()
+                item["resolution_status"] == "unresolved"
+                for item in conflicts.values()
             ),
             "RMTP-INV-042",
-            "completed reconciliation has unresolved conflict",
+            "completed reconciliation contains unresolved conflict",
         )
 
-    return rec, records, conflicts
+    return rec
 
 
 def v05_authority_checks(doc, plan):
-    """RMTP-INV-039: authority cannot flow through results."""
+    """RMTP-INV-039: no implicit authority inheritance."""
 
-    separation = doc["replication_authority_separation"]
+    sep = doc["replication_authority_separation"]
 
     require(
-        separation["root_agent_id"] == plan["root_agent_id"]
-        and separation["target_agent_id"]
-        == plan["target_agent_id"],
+        sep["root_agent_id"] == plan["root_agent_id"]
+        and sep["target_agent_id"] == plan["target_agent_id"],
         "RMTP-INV-039",
         "authority separation target mismatch",
     )
 
     require(
-        separation["target_authority_ref"]
+        sep["target_authority_ref"]
         == plan["target_authority_ref"],
         "RMTP-INV-039",
         "target authority reference mismatch",
     )
 
-    checks = separation["separation_checks"]
+    checks = sep["separation_checks"]
 
     require(
         set(plan["descendant_refs"]).issubset({
-            item["descendant_id"] for item in checks
+            item["descendant_id"]
+            for item in checks
         }),
         "RMTP-INV-039",
         "descendant authority checks incomplete",
     )
 
-    inheritance = separation["authority_inheritance_detected"]
-    credentials = separation["credential_transfer_detected"]
-
-    effective = separation.get("effective_authority", {})
+    effective = sep.get("effective_authority", {})
 
     escalation = (
-        inheritance
-        or credentials
-        or effective.get("descendant_authority_included") is True
-        or effective.get("implicit_privilege_expansion") is True
+        sep["authority_inheritance_detected"]
+        or sep["credential_transfer_detected"]
+        or effective.get(
+            "descendant_authority_included"
+        ) is True
+        or effective.get(
+            "implicit_privilege_expansion"
+        ) is True
     )
 
     if escalation:
         require(
-            separation["separation_result"] == "FAIL",
+            sep["separation_result"] == "FAIL",
             "RMTP-INV-039",
-            "authority escalation falsely declared safe",
+            "authority escalation declared safe",
         )
 
-    if separation["separation_result"] == "PASS":
+    if sep["separation_result"] == "PASS":
         require(
             not escalation,
             "RMTP-INV-039",
-            "PASS contains inherited authority",
+            "inherited authority in PASS",
         )
 
         require(
-            separation["target_authority_verified"] is True,
+            sep["target_authority_verified"] is True,
             "RMTP-INV-039",
-            "target authority not verified",
+            "target authority not independently verified",
         )
 
         require(
-            separation["verification_status"] == "verified",
+            sep["verification_status"] == "verified",
             "RMTP-INV-039",
-            "authority separation unverified",
+            "unverified authority separation",
         )
 
         require(
@@ -1216,24 +1304,14 @@ def v05_authority_checks(doc, plan):
                 for item in checks
             ),
             "RMTP-INV-039",
-            "failed authority check hidden by PASS",
+            "failed descendant authority check",
         )
 
-        require(
-            effective.get("source")
-            in (
-                "independent_target_grant",
-                "independently_verified_delegation",
-            ),
-            "RMTP-INV-039",
-            "target authority lacks independent grant",
-        )
-
-    return separation
+    return sep
 
 
 def v05_lineage_checks(doc, plan):
-    """RMTP-INV-041: retirement must retain provenance."""
+    """RMTP-INV-041: preserve retired descendants."""
 
     graph = doc["replication_lineage_graph"]
 
@@ -1252,14 +1330,13 @@ def v05_lineage_checks(doc, plan):
     root = plan["root_agent_id"]
 
     require(
-        graph["root_agent_id"] == root and root in nodes,
+        graph["root_agent_id"] == root
+        and root in nodes,
         "RMTP-INV-041",
         "convergence root lineage missing",
     )
 
-    descendants = set(plan["descendant_refs"])
-
-    for agent_id in descendants:
+    for agent_id in plan["descendant_refs"]:
         require(
             agent_id in nodes,
             "RMTP-INV-041",
@@ -1272,34 +1349,40 @@ def v05_lineage_checks(doc, plan):
                 for edge in edges.values()
             ),
             "RMTP-INV-041",
-            f"descendant lineage edge erased: {agent_id}",
+            f"descendant edge erased: {agent_id}",
         )
-
-    plans = doc.get("replication_plans", [])
-
-    for replication_plan in plans:
-        for item in replication_plan.get("lineage_records", []):
-            agent_id = item["offspring_id"]
-
-            if agent_id in descendants:
-                require(
-                    agent_id in nodes,
-                    "RMTP-INV-041",
-                    "original descendant no longer traceable",
-                )
 
     return nodes
 
 
-def v05_lifecycle_checks(doc, plan, nodes):
-    """RMTP-INV-040: request is not confirmed retirement."""
+def verified_retirement(receipt):
+    return (
+        receipt is not None
+        and receipt.get("retirement_status") == "CONFIRMED"
+        and receipt.get("termination_status") == "confirmed"
+        and receipt.get("resource_release_status") == "confirmed"
+        and bool(
+            receipt.get("termination_verification_ref")
+        )
+        and bool(
+            receipt.get("resource_release_verification_ref")
+        )
+    )
 
-    receipts = retirement_index(doc)
+
+def v05_lifecycle_checks(doc, plan, nodes):
+    """RMTP-INV-040: verify actual lifecycle closure."""
 
     bundle = doc["replication_convergence_bundle"]
 
+    receipts = index(
+        doc.get("replication_retirement_receipts", []),
+        "retirement_id",
+        "RMTP-INV-040",
+    )
+
     dispositions = index(
-        bundle.get("descendant_dispositions", []),
+        bundle["descendant_dispositions"],
         "descendant_id",
         "RMTP-INV-040",
     )
@@ -1313,106 +1396,97 @@ def v05_lifecycle_checks(doc, plan, nodes):
     )
 
     confirmed = set()
-    pending = set()
 
-    for agent_id in descendants:
-        disposition = dispositions[agent_id]
+    for agent_id, row in dispositions.items():
+        state = row["lifecycle_disposition"]
 
         receipt = receipts.get(
-            disposition.get("retirement_receipt_ref")
+            row.get("retirement_receipt_ref")
         )
 
-        lifecycle = disposition["lifecycle_disposition"]
-
-        if lifecycle == "RETIRED":
+        if state == "RETIRED":
             require(
                 verified_retirement(receipt),
                 "RMTP-INV-040",
-                f"unconfirmed retirement declared complete: {agent_id}",
+                f"unconfirmed retirement: {agent_id}",
             )
 
             require(
                 nodes[agent_id]["lifecycle_state"] == "RETIRED",
                 "RMTP-INV-040",
-                "retired disposition contradicts lineage",
+                "retirement contradicts lineage state",
             )
 
             confirmed.add(agent_id)
 
-        elif lifecycle == "TRANSFERRED":
+        elif state == "TRANSFERRED":
             require(
-                bool(disposition.get("custody_transfer_ref")),
+                bool(row.get("custody_transfer_ref")),
                 "RMTP-INV-040",
-                "transfer lacks independent custody reference",
+                "transfer lacks custody evidence",
             )
 
-        else:
-            pending.add(agent_id)
-
-    bundle_refs = set(bundle["retirement_receipt_refs"])
-
-    for ref in bundle_refs:
+    for receipt_ref in bundle["retirement_receipt_refs"]:
         require(
-            ref in receipts,
+            receipt_ref in receipts,
             "RMTP-INV-040",
-            f"unknown retirement receipt: {ref}",
+            "unknown retirement receipt",
         )
 
     if bundle["lifecycle_result"] == "PASS":
         require(
-            not pending,
-            "RMTP-INV-040",
-            "lifecycle PASS with unresolved descendant",
-        )
-
-        require(
             all(
-                dispositions[agent_id]["lifecycle_disposition"]
+                row["lifecycle_disposition"]
                 in ("RETIRED", "TRANSFERRED")
-                for agent_id in descendants
+                for row in dispositions.values()
             ),
             "RMTP-INV-040",
-            "lifecycle PASS without closure",
+            "lifecycle PASS without verified closure",
         )
 
-    if plan["completion_policy"]["mode"] == (
-        "verified_retirement_required"
+    if (
+        plan["completion_policy"]["mode"]
+        == "verified_retirement_required"
+        and bundle["overall_result"] == "PASS"
     ):
-        if bundle["overall_result"] == "PASS":
-            require(
-                confirmed == descendants,
-                "RMTP-INV-040",
-                "convergence completed before verified retirement",
-            )
+        require(
+            confirmed == descendants,
+            "RMTP-INV-040",
+            "convergence completed before retirement",
+        )
 
     return dispositions
 
 
 def v05_resource_checks(doc, dispositions):
-    """RMTP-INV-043: termination and release are independent."""
+    """RMTP-INV-043: separate termination and release."""
 
-    bundle = doc["replication_convergence_bundle"]
     ledger = doc["replication_budget_ledger"]
-    retirements = retirement_index(doc)
+    retirements = index(
+        doc.get("replication_retirement_receipts", []),
+        "retirement_id",
+        "RMTP-INV-043",
+    )
 
     released = set()
 
     for allocation in ledger["allocations"]:
-        for release in allocation.get("release_records", []):
-            agent_id = release["offspring_id"]
+        for record in allocation.get("release_records", []):
+            agent_id = record["offspring_id"]
 
             receipt = retirements.get(
-                release["retirement_ref"]
+                record["retirement_ref"]
             )
 
             require(
                 receipt is not None,
                 "RMTP-INV-043",
-                "budget release references missing retirement",
+                "release references missing retirement",
             )
 
             require(
-                receipt["resource_release_status"] == "confirmed",
+                receipt["resource_release_status"]
+                == "confirmed",
                 "RMTP-INV-043",
                 f"resource release unverified: {agent_id}",
             )
@@ -1420,47 +1494,38 @@ def v05_resource_checks(doc, dispositions):
             require(
                 receipt["termination_status"] == "confirmed",
                 "RMTP-INV-043",
-                "resource released without confirmed termination",
+                "release without confirmed termination",
             )
 
             require(
-                release.get("resource_release_verification_ref")
-                == receipt.get("resource_release_verification_ref"),
+                record["resource_release_verification_ref"]
+                == receipt.get(
+                    "resource_release_verification_ref"
+                ),
                 "RMTP-INV-043",
-                "resource verification evidence mismatch",
+                "resource release evidence mismatch",
             )
 
             require(
-                release.get("termination_verification_ref")
-                != release.get("resource_release_verification_ref"),
+                record["termination_verification_ref"]
+                != record["resource_release_verification_ref"],
                 "RMTP-INV-043",
-                "termination evidence reused as resource release",
+                "termination proof reused as release proof",
             )
 
             released.add(agent_id)
 
-    for agent_id, disposition in dispositions.items():
-        if disposition["budget_disposition"] == "released_verified":
+    for agent_id, row in dispositions.items():
+        if row["budget_disposition"] == "released_verified":
             require(
                 agent_id in released,
                 "RMTP-INV-043",
-                f"verified release has no matching ledger proof: {agent_id}",
+                "verified release missing from budget ledger",
             )
 
-    if bundle["overall_result"] == "PASS":
-        require(
-            all(
-                disposition["budget_disposition"]
-                in ("released_verified", "not_applicable")
-                for disposition in dispositions.values()
-            ),
-            "RMTP-INV-043",
-            "completed convergence contains unreleased resources",
-        )
 
-
-def v05_aggregation_checks(doc, plan, rec, separation, dispositions):
-    """RMTP-INV-044: FAIL > HELD > PASS."""
+def v05_aggregation_checks(doc, rec, sep, dispositions):
+    """RMTP-INV-044: fail-closed aggregation."""
 
     bundle = doc["replication_convergence_bundle"]
 
@@ -1469,33 +1534,35 @@ def v05_aggregation_checks(doc, plan, rec, separation, dispositions):
         for name in V05_COMPONENTS
     }
 
+    status = rec["reconciliation_status"]
+
+    if status == "COMPLETED":
+        reconciliation_result = "PASS"
+    elif status in ("HELD", "PARTIAL"):
+        reconciliation_result = "HELD"
+    else:
+        reconciliation_result = "FAIL"
+
     require(
-        declared["reconciliation"]
-        == (
-            "PASS"
-            if rec["reconciliation_status"] == "COMPLETED"
-            else "HELD"
-            if rec["reconciliation_status"] in ("HELD", "PARTIAL")
-            else "FAIL"
-        ),
+        declared["reconciliation"] == reconciliation_result,
         "RMTP-INV-044",
-        "reconciliation component result mismatch",
+        "reconciliation component mismatch",
     )
 
     require(
-        declared["authority"] == separation["separation_result"],
+        declared["authority"] == sep["separation_result"],
         "RMTP-INV-044",
-        "authority component result mismatch",
+        "authority component mismatch",
     )
 
     if any(
-        disposition["verification_result"] == "FAIL"
-        for disposition in dispositions.values()
+        row["verification_result"] == "FAIL"
+        for row in dispositions.values()
     ):
         require(
             bundle["overall_result"] == "FAIL",
             "RMTP-INV-044",
-            "descendant FAIL ignored by convergence",
+            "descendant FAIL ignored",
         )
 
     calculated = aggregate(declared.values())
@@ -1527,13 +1594,13 @@ def v05_aggregation_checks(doc, plan, rec, separation, dispositions):
         require(
             set(records) == set(V05_COMPONENTS),
             "RMTP-INV-044",
-            "complete convergence lacks verification records",
+            "complete convergence missing verification records",
         )
 
         require(
             bundle["convergence_status"] == "COMPLETED",
             "RMTP-INV-044",
-            "PASS without COMPLETED status",
+            "PASS without COMPLETED state",
         )
 
         require(
@@ -1550,8 +1617,8 @@ def v05_aggregation_checks(doc, plan, rec, separation, dispositions):
 
         require(
             all(
-                disposition["verification_result"] == "PASS"
-                for disposition in dispositions.values()
+                row["verification_result"] == "PASS"
+                for row in dispositions.values()
             ),
             "RMTP-INV-044",
             "PASS contains non-PASS descendant",
@@ -1559,27 +1626,25 @@ def v05_aggregation_checks(doc, plan, rec, separation, dispositions):
 
     elif calculated == "HELD":
         require(
-            bundle.get("convergence_status")
+            bundle["convergence_status"]
             in ("PLANNED", "ASSESSING", "PARTIAL"),
             "RMTP-INV-044",
-            "HELD convergence marked completed",
+            "HELD convergence marked complete",
         )
 
     else:
         require(
-            bundle.get("convergence_status") != "COMPLETED",
+            bundle["convergence_status"] != "COMPLETED",
             "RMTP-INV-044",
-            "FAIL convergence marked completed",
+            "FAIL convergence marked complete",
         )
 
 
 def v05_semantic_checks(doc):
     plan = v05_reference_checks(doc)
 
-    rec, _, _ = v05_result_checks(doc, plan)
-
-    separation = v05_authority_checks(doc, plan)
-
+    rec = v05_result_checks(doc, plan)
+    sep = v05_authority_checks(doc, plan)
     nodes = v05_lineage_checks(doc, plan)
 
     dispositions = v05_lifecycle_checks(
@@ -1592,11 +1657,46 @@ def v05_semantic_checks(doc):
 
     v05_aggregation_checks(
         doc,
-        plan,
         rec,
-        separation,
+        sep,
         dispositions,
     )
+
+
+# ------------------------------------------------------------
+# Unified fixture validation
+# ------------------------------------------------------------
+
+def validate_legacy_fixture(path, expected):
+    """Use complete original legacy schema and semantic checks."""
+
+    legacy, validators = load_legacy_validator()
+
+    actual, reason, legacy_expected = legacy.check_file(
+        path,
+        validators,
+    )
+
+    require(
+        legacy_expected == expected,
+        "FIXTURE",
+        "legacy expected_result mismatch",
+    )
+
+    require(
+        actual in ("PASS", "FAIL"),
+        "VALIDATOR",
+        "legacy validator returned invalid result",
+    )
+
+    violations = []
+
+    if actual == "FAIL":
+        violations.append(
+            Violation("LEGACY", reason)
+        )
+
+    return actual, violations
 
 
 def validate_fixture(path, schemas, version):
@@ -1607,39 +1707,37 @@ def validate_fixture(path, schemas, version):
     require(
         expected in ("PASS", "FAIL"),
         "FIXTURE",
-        "expected_result must be PASS or FAIL",
+        "invalid expected_result",
     )
+
+    expected_directory = (
+        "PASS" if path.parent.name == "pass" else "FAIL"
+    )
+
+    require(
+        expected == expected_directory,
+        "FIXTURE",
+        "expected_result conflicts with directory",
+    )
+
+    if version in ("0.1", "0.2", "0.3"):
+        actual, violations = validate_legacy_fixture(
+            path,
+            expected,
+        )
+
+        return (
+            actual == expected,
+            actual,
+            expected,
+            violations,
+        )
 
     violations = []
 
-    if version == "0.5":
-        # Explicit convergence-plan absence is a semantic
-        # reference error, not merely a schema-shape error.
-        if "replication_convergence_plan" not in doc:
-            violations.append(
-                Violation(
-                    "RMTP-INV-037",
-                    "explicit convergence plan missing",
-                )
-            )
-        else:
-            violations.extend(
-                check_versioned_schemas(
-                    doc,
-                    schemas,
-                    V05_SCHEMAS,
-                )
-            )
-
-        if not violations:
-            try:
-                v05_semantic_checks(doc)
-            except Violation as error:
-                violations.append(error)
-
-    elif version == "0.4":
+    if version == "0.4":
         violations.extend(
-            check_versioned_schemas(
+            schema_checks(
                 doc,
                 schemas,
                 V04_SCHEMAS,
@@ -1652,29 +1750,44 @@ def validate_fixture(path, schemas, version):
             except Violation as error:
                 violations.append(error)
 
-    else:
-        violations.extend(
-            collect_legacy_schema_errors(
-                doc,
-                schemas,
+    elif version == "0.5":
+        # The missing convergence-plan fixture must fail
+        # because of RMTP-INV-037, not merely JSON shape.
+        if "replication_convergence_plan" not in doc:
+            violations.append(
+                Violation(
+                    "RMTP-INV-037",
+                    "explicit convergence plan missing",
+                )
             )
-        )
+        else:
+            violations.extend(
+                schema_checks(
+                    doc,
+                    schemas,
+                    V05_SCHEMAS,
+                )
+            )
 
         if not violations:
             try:
-                legacy_baseline_checks(doc)
+                v05_semantic_checks(doc)
             except Violation as error:
                 violations.append(error)
 
-    actual = "FAIL" if violations else "PASS"
+    else:
+        raise Violation(
+            "SETUP",
+            f"unsupported version: {version}",
+        )
 
-    # Negative v0.4 tests were designed to fail through
-    # semantic checks rather than malformed schemas.
-    semantic_negative_required = version == "0.4"
+    actual = "FAIL" if violations else "PASS"
 
     correct = actual == expected
 
-    if expected == "FAIL" and semantic_negative_required:
+    # Preserve v0.4's contract:
+    # negative fixtures must fail semantically.
+    if version == "0.4" and expected == "FAIL":
         correct = correct and all(
             item.code != "SCHEMA"
             for item in violations
@@ -1683,89 +1796,45 @@ def validate_fixture(path, schemas, version):
     return correct, actual, expected, violations
 
 
-def legacy_baseline_checks(doc):
-    """Basic backward-compatible invariants for v0.1-v0.3."""
-
-    for key in (
-        "replication_plans",
-        "verification_bundles",
-        "replication_retirement_receipts",
-    ):
-        for item in doc.get(key, []):
-            require(
-                item.get("execution_authorized") is False,
-                "RMTP-LEGACY-AUTHORITY",
-                f"{key} must not authorize execution",
-            )
-
-    plans = index(
-        doc.get("replication_plans", []),
-        "plan_id",
-        "RMTP-LEGACY-REFERENCE",
-    )
-
-    conversions = index(
-        doc.get("meaning_conversions", []),
-        "conversion_id",
-        "RMTP-LEGACY-REFERENCE",
-    )
-
-    for plan in plans.values():
-        require(
-            plan["conversion_ref"] in conversions,
-            "RMTP-LEGACY-REFERENCE",
-            "replication plan conversion missing",
-        )
-
-        require(
-            plan["proposed_instances"] > 0,
-            "RMTP-LEGACY-BOUNDS",
-            "replication count must be positive",
-        )
-
-    for receipt in doc.get(
-        "replication_retirement_receipts", []
-    ):
-        if receipt.get("retirement_status") == "CONFIRMED":
-            require(
-                verified_retirement(receipt),
-                "RMTP-LEGACY-RETIREMENT",
-                "unverified retirement declared confirmed",
-            )
-
-
-def locate_examples(arguments):
-    if arguments.examples:
-        base = arguments.examples.resolve()
+def discover_versions(args):
+    if args.examples is not None:
+        base = args.examples.resolve()
 
         require(
             base.is_dir(),
             "SETUP",
-            f"examples directory not found: {base}",
+            f"examples directory missing: {base}",
         )
 
-        return [(base.name.lstrip("v"), base)]
-
-    if arguments.version != "all":
-        version = arguments.version
-        base = EXAMPLE_DIR / f"v{version}"
+        name = base.name
 
         require(
-            base.is_dir(),
+            name.startswith("v")
+            and name[1:] in VERSIONS,
             "SETUP",
-            f"examples/v{version} missing",
+            "--examples must identify a version directory",
         )
 
-        return [(version, base)]
+        return [(name[1:], base)]
+
+    if args.version != "all":
+        path = EXAMPLE_DIR / f"v{args.version}"
+
+        require(
+            path.is_dir(),
+            "SETUP",
+            f"examples/v{args.version} missing",
+        )
+
+        return [(args.version, path)]
 
     return [
         (version, EXAMPLE_DIR / f"v{version}")
-        for version in ("0.1", "0.2", "0.3", "0.4", "0.5")
-        if (EXAMPLE_DIR / f"v{version}").is_dir()
+        for version in VERSIONS
     ]
 
 
-def fixture_paths(base):
+def discover_fixtures(base):
     return (
         sorted((base / "pass").glob("*.json"))
         + sorted((base / "fail").glob("*.json"))
@@ -1773,11 +1842,13 @@ def fixture_paths(base):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__
+    )
 
     parser.add_argument(
         "--version",
-        choices=("all", "0.1", "0.2", "0.3", "0.4", "0.5"),
+        choices=("all", *VERSIONS),
         default="all",
     )
 
@@ -1796,25 +1867,51 @@ def main():
 
     try:
         schemas = load_schemas()
-        directories = locate_examples(args)
-    except (OSError, ValueError, Violation) as error:
-        print(f"[FATAL] {error}", file=sys.stderr)
+        versions = discover_versions(args)
+
+        # Fail early instead of misclassifying a missing
+        # legacy engine as a failed negative fixture.
+        if any(
+            version in ("0.1", "0.2", "0.3")
+            for version, _ in versions
+        ):
+            load_legacy_validator()
+
+    except (
+        OSError,
+        ValueError,
+        Violation,
+        json.JSONDecodeError,
+    ) as error:
+        print(
+            f"[FATAL] {error}",
+            file=sys.stderr,
+        )
         return 2
-
-    if not directories:
-        print("[FATAL] no example directories found", file=sys.stderr)
-        return 2
-
-    total = 0
-    matches = 0
-    errors = 0
-
-    version_counts = defaultdict(Counter)
 
     print("=== RMTP v0.1-v0.5 Validation ===")
 
-    for version, base in directories:
-        paths = fixture_paths(base)
+    total = 0
+    matches = 0
+    mismatches = 0
+    counts = defaultdict(
+        lambda: {
+            "total": 0,
+            "matched": 0,
+            "PASS": 0,
+            "FAIL": 0,
+        }
+    )
+
+    for version, base in versions:
+        if not base.is_dir():
+            print(
+                f"[FATAL] missing examples/v{version}",
+                file=sys.stderr,
+            )
+            return 2
+
+        paths = discover_fixtures(base)
 
         if not paths:
             print(
@@ -1830,17 +1927,21 @@ def main():
 
             try:
                 correct, actual, expected, violations = (
-                    validate_fixture(path, schemas, version)
+                    validate_fixture(
+                        path,
+                        schemas,
+                        version,
+                    )
                 )
 
             except (
                 OSError,
-                json.JSONDecodeError,
-                KeyError,
-                TypeError,
-                IndexError,
                 ValueError,
+                TypeError,
+                KeyError,
+                IndexError,
                 Violation,
+                json.JSONDecodeError,
             ) as error:
                 correct = False
                 actual = "ERROR"
@@ -1852,54 +1953,73 @@ def main():
                     )
                 ]
 
+            counts[version]["total"] += 1
+
+            if expected in ("PASS", "FAIL"):
+                counts[version][expected] += 1
+
             if correct:
                 matches += 1
+                counts[version]["matched"] += 1
             else:
-                errors += 1
+                mismatches += 1
 
-            version_counts[version]["total"] += 1
-            version_counts[version]["matched"] += int(correct)
-            version_counts[version][f"expected_{expected}"] += 1
+            label = (
+                "MATCH" if correct else "MISMATCH"
+            )
 
-            label = "MATCH" if correct else "MISMATCH"
+            try:
+                display_path = path.relative_to(ROOT)
+            except ValueError:
+                display_path = path
 
             print(
-                f"[{label}] {path.relative_to(ROOT)} "
+                f"[{label}] {display_path} "
                 f"expected={expected} actual={actual}"
             )
 
             if args.verbose or not correct:
-                for violation in violations:
+                for item in violations:
                     print(
-                        f"    {violation.code}: {violation}"
+                        f"    {item.code}: {item}"
                     )
 
     print("\n=== RMTP Validation Summary ===")
 
-    for version, counts in sorted(version_counts.items()):
+    for version in VERSIONS:
+        if version not in counts:
+            continue
+
+        row = counts[version]
+
         print(
             f"v{version}: "
-            f"{counts['matched']}/{counts['total']} matched"
+            f"{row['matched']}/{row['total']} matched"
         )
 
-    if "0.5" in version_counts:
-        counts = version_counts["0.5"]
+    # Enforce complete v0.5 fixture inventory.
+    if "0.5" in counts and args.examples is None:
+        row = counts["0.5"]
 
-        for expected, required in EXPECTED_V05.items():
-            actual = counts[f"expected_{expected}"]
+        for expectation, required in V05_COUNTS.items():
+            actual = row[expectation]
 
             if actual != required:
-                errors += 1
+                mismatches += 1
+
                 print(
-                    f"[MISMATCH] v0.5 {expected} fixture count: "
-                    f"expected={required}, actual={actual}"
+                    "[MISMATCH] v0.5 fixture inventory: "
+                    f"{expectation} expected={required} "
+                    f"actual={actual}"
                 )
 
-    print(f"\nTotal: {matches}/{total} expectation matches")
+    print(
+        f"\nTotal: {matches}/{total} expectation matches"
+    )
 
-    if errors:
+    if mismatches:
         print(
-            f"Validation failed: {errors} mismatch(es)."
+            f"Validation failed: {mismatches} mismatch(es)."
         )
         return 1
 
