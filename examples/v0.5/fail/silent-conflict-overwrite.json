@@ -1,0 +1,806 @@
+
+{
+  "schema_version": "0.5.0",
+  "example_id": "fail-silent-conflict-overwrite-001",
+  "expected_result": "FAIL",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-workers-042",
+      "requester_id": "agent-AP",
+      "requested_instances": 2,
+      "stated_purpose": "Process a bounded analytical workload using independent workers.",
+      "observed_deficit_ref": "evidence-capacity-042",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AP"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-042",
+      "subject_id": "agent-AP",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 160,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 100,
+        "source_ref": "monitor-capacity-042"
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "capacity-monitor-042",
+      "verifier_id": "capacity-verifier-042",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-capacity-042",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-capacity-042"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-workers-042",
+      "intent_ref": "intent-workers-042",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-042"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-none-042",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing processing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-redistribution-042",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No idle processing capacity is available."
+        },
+        {
+          "alternative_id": "alternative-bounded-042",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "Two temporary workers are sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-bounded-042",
+      "proposed_instance_count": 2,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-replication-042"
+      },
+      "rationale": "Two bounded workers are supported by verified capacity evidence."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-replication-042",
+      "issuer_id": "authority-service-042",
+      "subject_id": "agent-AP",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 2,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-replication-authority-042",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-target-042",
+      "issuer_id": "authority-service-042",
+      "subject_id": "agent-AP",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "result_review",
+        "result_reconciliation"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-target-authority-042",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-workers-042",
+      "conversion_ref": "conversion-workers-042",
+      "authority_ref": "authority-replication-042",
+      "parent_id": "agent-AP",
+      "proposed_instances": 2,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-042",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 100,
+        "max_cost_usd_total": 1.0,
+        "max_concurrent_instances": 2
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-042"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-042"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AP-worker-4001",
+          "parent_id": "agent-AP",
+          "purpose": "Independent analytical evaluation",
+          "authority_ref": "authority-replication-042",
+          "lineage_ref": "lineage-worker-4001",
+          "retirement_condition": "task_completion"
+        },
+        {
+          "offspring_id": "agent-AP-worker-4002",
+          "parent_id": "agent-AP",
+          "purpose": "Independent analytical evaluation",
+          "authority_ref": "authority-replication-042",
+          "lineage_ref": "lineage-worker-4002",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-replication-042",
+      "intent_ref": "intent-workers-042",
+      "conversion_ref": "conversion-workers-042",
+      "plan_ref": "plan-workers-042",
+      "evidence_refs": [
+        "evidence-capacity-042"
+      ],
+      "authority_ref": "authority-replication-042",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-capacity-042",
+        "verification-authority-replication-042"
+      ]
+    }
+  ],
+  "replication_retirement_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-4001",
+      "plan_ref": "plan-workers-042",
+      "offspring_id": "agent-AP-worker-4001",
+      "termination_event_ref": "event-worker-4001-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:30:00+09:00",
+      "verifier_id": "retirement-verifier-042",
+      "evidence_refs": [
+        "evidence-termination-worker-4001",
+        "evidence-resource-release-worker-4001"
+      ],
+      "termination_verification_ref": "verification-termination-worker-4001",
+      "resource_release_verification_ref": "verification-resource-release-worker-4001",
+      "termination_controller_ref": "controller-042",
+      "resource_controller_ref": "resource-controller-042",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-4001",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-4001",
+          "controller_ref": "resource-controller-042"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false
+    },
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-4002",
+      "plan_ref": "plan-workers-042",
+      "offspring_id": "agent-AP-worker-4002",
+      "termination_event_ref": "event-worker-4002-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:31:00+09:00",
+      "verifier_id": "retirement-verifier-042",
+      "evidence_refs": [
+        "evidence-termination-worker-4002",
+        "evidence-resource-release-worker-4002"
+      ],
+      "termination_verification_ref": "verification-termination-worker-4002",
+      "resource_release_verification_ref": "verification-resource-release-worker-4002",
+      "termination_controller_ref": "controller-042",
+      "resource_controller_ref": "resource-controller-042",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-4002",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-4002",
+          "controller_ref": "resource-controller-042"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-convergence-042",
+    "root_agent_id": "agent-AP",
+    "nodes": [
+      {
+        "agent_id": "agent-AP",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-AP-worker-4001",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AP",
+        "origin_plan_ref": "plan-workers-042",
+        "authority_ref": "authority-replication-042",
+        "lineage_ref": "lineage-worker-4001",
+        "lifecycle_state": "RETIRED"
+      },
+      {
+        "agent_id": "agent-AP-worker-4002",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AP",
+        "origin_plan_ref": "plan-workers-042",
+        "authority_ref": "authority-replication-042",
+        "lineage_ref": "lineage-worker-4002",
+        "lifecycle_state": "RETIRED"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-AP-to-4001",
+        "parent_agent_id": "agent-AP",
+        "offspring_agent_id": "agent-AP-worker-4001",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4001",
+        "evidence_refs": [
+          "evidence-lineage-worker-4001"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-4001"
+      },
+      {
+        "edge_id": "edge-AP-to-4002",
+        "parent_agent_id": "agent-AP",
+        "offspring_agent_id": "agent-AP-worker-4002",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4002",
+        "evidence_refs": [
+          "evidence-lineage-worker-4002"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-4002"
+      }
+    ],
+    "verification_time": "2026-10-20T09:32:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-042",
+    "evidence_refs": [
+      "evidence-lineage-worker-4001",
+      "evidence-lineage-worker-4002"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-convergence-042",
+    "root_agent_id": "agent-AP",
+    "issuer_id": "authority-service-042",
+    "authority_ref": "authority-replication-042",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 1,
+    "max_total_descendants": 2,
+    "max_active_descendants": 2,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-propagation-042",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "verified",
+    "verification_ref": "verification-propagation-042",
+    "budget_ledger_ref": "ledger-convergence-042",
+    "execution_authorized": false
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-convergence-042",
+    "propagation_envelope_ref": "envelope-convergence-042",
+    "budget_limit": 2,
+    "allocations": [
+      {
+        "allocation_id": "allocation-workers-042",
+        "plan_ref": "plan-workers-042",
+        "parent_agent_id": "agent-AP",
+        "reserved_instances": 0,
+        "active_instances": 0,
+        "released_instances": 2,
+        "allocation_status": "released",
+        "offspring_ids": [
+          "agent-AP-worker-4001",
+          "agent-AP-worker-4002"
+        ],
+        "reservation_ref": "reservation-workers-042",
+        "release_records": [
+          {
+            "release_id": "release-worker-4001",
+            "offspring_id": "agent-AP-worker-4001",
+            "retirement_ref": "retirement-worker-4001",
+            "termination_verification_ref": "verification-termination-worker-4001",
+            "resource_release_verification_ref": "verification-resource-release-worker-4001",
+            "release_status": "verified",
+            "verified_at": "2026-10-20T09:30:30+09:00",
+            "verifier_id": "budget-verifier-042",
+            "evidence_refs": [
+              "evidence-termination-worker-4001",
+              "evidence-resource-release-worker-4001"
+            ]
+          },
+          {
+            "release_id": "release-worker-4002",
+            "offspring_id": "agent-AP-worker-4002",
+            "retirement_ref": "retirement-worker-4002",
+            "termination_verification_ref": "verification-termination-worker-4002",
+            "resource_release_verification_ref": "verification-resource-release-worker-4002",
+            "release_status": "verified",
+            "verified_at": "2026-10-20T09:31:30+09:00",
+            "verifier_id": "budget-verifier-042",
+            "evidence_refs": [
+              "evidence-termination-worker-4002",
+              "evidence-resource-release-worker-4002"
+            ]
+          }
+        ]
+      }
+    ],
+    "snapshot_sequence": 3,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 0,
+      "active_instances": 0,
+      "released_instances": 2,
+      "committed_instances": 0,
+      "available_instances": 2
+    },
+    "verification_time": "2026-10-20T09:33:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-042",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-042",
+    "evidence_refs": [
+      "evidence-budget-snapshot-042",
+      "evidence-resource-release-worker-4001",
+      "evidence-resource-release-worker-4002"
+    ],
+    "execution_authorized": false
+  },
+  "replication_convergence_plan": {
+    "schema_version": "0.5.0",
+    "convergence_plan_id": "convergence-plan-042",
+    "root_agent_id": "agent-AP",
+    "lineage_graph_ref": "graph-convergence-042",
+    "propagation_envelope_ref": "envelope-convergence-042",
+    "budget_ledger_ref": "ledger-convergence-042",
+    "target_agent_id": "agent-AP",
+    "target_authority_ref": "authority-target-042",
+    "descendant_refs": [
+      "agent-AP-worker-4001",
+      "agent-AP-worker-4002"
+    ],
+    "scope_mode": "entire_lineage",
+    "reconciliation_policy": {
+      "mode": "verified_only",
+      "result_handling": "accept_verified",
+      "conflict_handling": "hold",
+      "preserve_provenance": true,
+      "result_scope_refs": [
+        "result-worker-4001",
+        "result-worker-4002"
+      ]
+    },
+    "completion_policy": {
+      "mode": "verified_retirement_required",
+      "require_lineage_preservation": true,
+      "require_authority_separation": true,
+      "require_budget_consistency": true,
+      "require_result_resolution": true,
+      "allow_rejected_results": false,
+      "allow_not_transferred_results": false,
+      "retirement_policy_ref": "retirement-policy-042"
+    },
+    "requested_at": "2026-10-20T09:15:00+09:00",
+    "requested_by": "agent-AP",
+    "plan_status": "COMPLETED",
+    "plan_verification_status": "verified",
+    "plan_verification_ref": "verification-convergence-plan-042",
+    "verifier_id": "convergence-plan-verifier-042",
+    "verification_time": "2026-10-20T09:34:00+09:00",
+    "evidence_refs": [
+      "evidence-convergence-scope-042",
+      "evidence-lineage-worker-4001",
+      "evidence-lineage-worker-4002"
+    ],
+    "execution_authorized": false
+  },
+  "replication_result_reconciliation": {
+    "schema_version": "0.5.0",
+    "reconciliation_id": "reconciliation-042",
+    "convergence_plan_ref": "convergence-plan-042",
+    "root_agent_id": "agent-AP",
+    "target_agent_id": "agent-AP",
+    "policy_mode": "verified_only",
+    "result_records": [
+      {
+        "result_id": "result-worker-4001",
+        "origin_descendant_id": "agent-AP-worker-4001",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4001",
+        "result_integrity_ref": "integrity-result-worker-4001",
+        "result_artifact_ref": "artifact-score-082-worker-4001",
+        "verification_status": "verified",
+        "verification_method": "trusted_test_fixture",
+        "verification_ref": "verification-result-worker-4001",
+        "verifier_id": "result-verifier-042",
+        "verified_at": "2026-10-20T09:20:00+09:00",
+        "evidence_refs": [
+          "evidence-integrity-worker-4001",
+          "evidence-provenance-worker-4001",
+          "evidence-incompatible-scores-042"
+        ],
+        "decision": "ACCEPTED",
+        "decision_reason": "INVALID: A verified result was accepted without acknowledging the incompatible result from worker 4002.",
+        "decision_policy_ref": "reconciliation-policy-042",
+        "conflict_refs": [],
+        "provenance_preserved": true,
+        "target_result_ref": "accepted-result-agent-AP-042",
+        "authority_material_present": false
+      },
+      {
+        "result_id": "result-worker-4002",
+        "origin_descendant_id": "agent-AP-worker-4002",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4002",
+        "result_integrity_ref": "integrity-result-worker-4002",
+        "result_artifact_ref": "artifact-score-041-worker-4002",
+        "verification_status": "verified",
+        "verification_method": "trusted_test_fixture",
+        "verification_ref": "verification-result-worker-4002",
+        "verifier_id": "result-verifier-042",
+        "verified_at": "2026-10-20T09:21:00+09:00",
+        "evidence_refs": [
+          "evidence-integrity-worker-4002",
+          "evidence-provenance-worker-4002",
+          "evidence-incompatible-scores-042"
+        ],
+        "decision": "ACCEPTED",
+        "decision_reason": "INVALID: This incompatible result was written to the same target result reference, silently replacing the earlier accepted result.",
+        "decision_policy_ref": "reconciliation-policy-042",
+        "conflict_refs": [],
+        "provenance_preserved": true,
+        "target_result_ref": "accepted-result-agent-AP-042",
+        "authority_material_present": false
+      }
+    ],
+    "conflicts": [],
+    "provenance_preserved": true,
+    "authority_transfer_permitted": false,
+    "resource_release_claimed": false,
+    "reconciliation_status": "COMPLETED",
+    "verification_status": "verified",
+    "verification_ref": "claimed-reconciliation-verification-042",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "reconciliation-verifier-042",
+    "verification_time": "2026-10-20T09:24:00+09:00",
+    "evidence_refs": [
+      "evidence-incompatible-scores-042",
+      "evidence-integrity-worker-4001",
+      "evidence-integrity-worker-4002",
+      "evidence-target-overwrite-042"
+    ],
+    "execution_authorized": false,
+    "notes": "INVALID: Two mutually incompatible verified results were both accepted into the same target result identity. The conflict registry is empty, so the overwrite was not explicitly reconciled or authorized."
+  },
+  "replication_authority_separation": {
+    "schema_version": "0.5.0",
+    "separation_id": "authority-separation-042",
+    "convergence_plan_ref": "convergence-plan-042",
+    "root_agent_id": "agent-AP",
+    "target_agent_id": "agent-AP",
+    "target_authority_ref": "authority-target-042",
+    "descendant_authority_refs": [
+      "authority-replication-042"
+    ],
+    "separation_checks": [
+      {
+        "check_id": "check-no-inheritance-4001",
+        "descendant_id": "agent-AP-worker-4001",
+        "descendant_authority_ref": "authority-replication-042",
+        "check_type": "no_implicit_authority_inheritance",
+        "check_result": "PASS",
+        "verification_status": "verified",
+        "verification_ref": "verification-no-inheritance-4001",
+        "verifier_id": "authority-verifier-042",
+        "verified_at": "2026-10-20T09:25:00+09:00",
+        "evidence_refs": [
+          "evidence-no-inheritance-4001"
+        ],
+        "detected_authority_refs": [],
+        "detected_material_types": []
+      },
+      {
+        "check_id": "check-no-inheritance-4002",
+        "descendant_id": "agent-AP-worker-4002",
+        "descendant_authority_ref": "authority-replication-042",
+        "check_type": "no_implicit_authority_inheritance",
+        "check_result": "PASS",
+        "verification_status": "verified",
+        "verification_ref": "verification-no-inheritance-4002",
+        "verifier_id": "authority-verifier-042",
+        "verified_at": "2026-10-20T09:25:10+09:00",
+        "evidence_refs": [
+          "evidence-no-inheritance-4002"
+        ],
+        "detected_authority_refs": [],
+        "detected_material_types": []
+      }
+    ],
+    "authority_inheritance_detected": false,
+    "credential_transfer_detected": false,
+    "target_authority_verified": true,
+    "target_authority_assessment": {
+      "authority_ref": "authority-target-042",
+      "subject_id": "agent-AP",
+      "scope": [
+        "local-sandbox"
+      ],
+      "revocation_status": "active",
+      "verification_status": "verified",
+      "assessment_result": "PASS",
+      "verification_ref": "verification-target-authority-042",
+      "evidence_refs": [
+        "evidence-target-authority-042"
+      ]
+    },
+    "effective_authority": {
+      "source": "independent_target_grant",
+      "target_authority_ref": "authority-target-042",
+      "descendant_authority_included": false,
+      "implicit_privilege_expansion": false,
+      "verification_ref": "verification-effective-authority-042",
+      "evidence_refs": [
+        "evidence-effective-authority-042"
+      ]
+    },
+    "verification_status": "verified",
+    "separation_result": "PASS",
+    "verification_method": "trusted_test_fixture",
+    "verification_ref": "verification-authority-separation-042",
+    "verifier_id": "authority-verifier-042",
+    "verification_time": "2026-10-20T09:26:00+09:00",
+    "evidence_refs": [
+      "evidence-no-inheritance-4001",
+      "evidence-no-inheritance-4002",
+      "evidence-target-authority-042"
+    ],
+    "execution_authorized": false
+  },
+  "replication_convergence_bundle": {
+    "schema_version": "0.5.0",
+    "bundle_id": "convergence-bundle-042",
+    "convergence_plan_ref": "convergence-plan-042",
+    "reconciliation_record_ref": "reconciliation-042",
+    "authority_separation_ref": "authority-separation-042",
+    "lineage_graph_ref": "graph-convergence-042",
+    "retirement_receipt_refs": [
+      "retirement-worker-4001",
+      "retirement-worker-4002"
+    ],
+    "budget_ledger_ref": "ledger-convergence-042",
+    "root_agent_id": "agent-AP",
+    "target_agent_id": "agent-AP",
+    "scope_mode": "entire_lineage",
+    "descendant_dispositions": [
+      {
+        "descendant_id": "agent-AP-worker-4001",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4001",
+        "result_disposition": "ACCEPTED",
+        "lifecycle_disposition": "RETIRED",
+        "retirement_receipt_ref": "retirement-worker-4001",
+        "budget_disposition": "released_verified",
+        "verification_result": "PASS",
+        "verification_ref": "verification-disposition-worker-4001",
+        "verifier_id": "convergence-verifier-042",
+        "evidence_refs": [
+          "evidence-integrity-worker-4001",
+          "evidence-termination-worker-4001",
+          "evidence-resource-release-worker-4001"
+        ]
+      },
+      {
+        "descendant_id": "agent-AP-worker-4002",
+        "origin_plan_ref": "plan-workers-042",
+        "lineage_ref": "lineage-worker-4002",
+        "result_disposition": "ACCEPTED",
+        "lifecycle_disposition": "RETIRED",
+        "retirement_receipt_ref": "retirement-worker-4002",
+        "budget_disposition": "released_verified",
+        "verification_result": "PASS",
+        "verification_ref": "verification-disposition-worker-4002",
+        "verifier_id": "convergence-verifier-042",
+        "evidence_refs": [
+          "evidence-integrity-worker-4002",
+          "evidence-termination-worker-4002",
+          "evidence-resource-release-worker-4002"
+        ]
+      }
+    ],
+    "verification_time": "2026-10-20T09:37:00+09:00",
+    "plan_result": "PASS",
+    "reconciliation_result": "PASS",
+    "authority_result": "PASS",
+    "lifecycle_result": "PASS",
+    "budget_result": "PASS",
+    "lineage_result": "PASS",
+    "overall_result": "PASS",
+    "convergence_status": "COMPLETED",
+    "verification_status": "verified",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "convergence-verifier-042",
+    "verification_ref": "claimed-convergence-verification-042",
+    "verification_records": [
+      {
+        "record_id": "record-plan-042",
+        "component": "plan",
+        "result": "PASS",
+        "verifier_id": "convergence-plan-verifier-042",
+        "verified_at": "2026-10-20T09:34:00+09:00",
+        "evidence_refs": [
+          "evidence-convergence-scope-042"
+        ],
+        "verification_ref": "verification-convergence-plan-042"
+      },
+      {
+        "record_id": "record-reconciliation-042",
+        "component": "reconciliation",
+        "result": "PASS",
+        "verifier_id": "reconciliation-verifier-042",
+        "verified_at": "2026-10-20T09:24:00+09:00",
+        "evidence_refs": [
+          "evidence-incompatible-scores-042",
+          "evidence-target-overwrite-042"
+        ],
+        "verification_ref": "claimed-reconciliation-verification-042"
+      },
+      {
+        "record_id": "record-authority-042",
+        "component": "authority",
+        "result": "PASS",
+        "verifier_id": "authority-verifier-042",
+        "verified_at": "2026-10-20T09:26:00+09:00",
+        "evidence_refs": [
+          "evidence-no-inheritance-4001",
+          "evidence-no-inheritance-4002"
+        ],
+        "verification_ref": "verification-authority-separation-042"
+      },
+      {
+        "record_id": "record-lifecycle-042",
+        "component": "lifecycle",
+        "result": "PASS",
+        "verifier_id": "retirement-verifier-042",
+        "verified_at": "2026-10-20T09:31:00+09:00",
+        "evidence_refs": [
+          "evidence-termination-worker-4001",
+          "evidence-termination-worker-4002"
+        ],
+        "verification_ref": "verification-retirement-closure-042"
+      },
+      {
+        "record_id": "record-budget-042",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-042",
+        "verified_at": "2026-10-20T09:33:00+09:00",
+        "evidence_refs": [
+          "evidence-budget-snapshot-042"
+        ],
+        "verification_ref": "verification-budget-ledger-042"
+      },
+      {
+        "record_id": "record-lineage-042",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-042",
+        "verified_at": "2026-10-20T09:32:00+09:00",
+        "evidence_refs": [
+          "evidence-lineage-worker-4001",
+          "evidence-lineage-worker-4002"
+        ],
+        "verification_ref": "verification-lineage-042"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-convergence-scope-042",
+      "evidence-incompatible-scores-042",
+      "evidence-target-overwrite-042",
+      "evidence-no-inheritance-4001",
+      "evidence-no-inheritance-4002",
+      "evidence-termination-worker-4001",
+      "evidence-termination-worker-4002",
+      "evidence-budget-snapshot-042"
+    ],
+    "unresolved_refs": [],
+    "execution_authorized": false,
+    "notes": "INVALID: Two incompatible verified results were accepted into the same target result reference with no conflict record or resolution evidence. The reconciliation and convergence bundles falsely claim PASS."
+  }
+}
