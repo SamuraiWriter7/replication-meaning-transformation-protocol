@@ -1,0 +1,680 @@
+
+{
+  "schema_version": "0.5.0",
+  "example_id": "fail-descendant-authority-escalation-001",
+  "expected_result": "FAIL",
+  "replication_intents": [
+    {
+      "schema_version": "0.1.0",
+      "intent_id": "intent-worker-3701",
+      "requester_id": "agent-AM",
+      "requested_instances": 1,
+      "stated_purpose": "Create one bounded worker for temporary processing.",
+      "observed_deficit_ref": "evidence-capacity-039",
+      "requested_role": "worker",
+      "target_scope": "local-sandbox",
+      "parent_id": "agent-AM"
+    }
+  ],
+  "structural_evidence": [
+    {
+      "schema_version": "0.2.0",
+      "evidence_id": "evidence-capacity-039",
+      "subject_id": "agent-AM",
+      "deficit_type": "capacity",
+      "observation": {
+        "metric": "queue_depth",
+        "value": 125,
+        "unit": "tasks",
+        "comparison": "gt",
+        "threshold": 80,
+        "source_ref": "monitor-capacity-039"
+      },
+      "observed_at": "2026-10-20T09:00:00+09:00",
+      "expires_at": "2026-10-20T10:00:00+09:00",
+      "observer_id": "monitor-capacity-039",
+      "verifier_id": "capacity-verifier-039",
+      "verification_status": "verified",
+      "integrity_reference": {
+        "method": "external_attestation",
+        "value": "fixture-capacity-039",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "verification_ref": "verification-capacity-039"
+    }
+  ],
+  "meaning_conversions": [
+    {
+      "schema_version": "0.1.0",
+      "conversion_id": "conversion-worker-3701",
+      "intent_ref": "intent-worker-3701",
+      "deficit_assessment": {
+        "deficit_type": "capacity",
+        "verification_status": "verified",
+        "evidence_refs": [
+          "evidence-capacity-039"
+        ],
+        "necessity": "required"
+      },
+      "evaluated_alternatives": [
+        {
+          "alternative_id": "alternative-none-039",
+          "strategy": "no_replication",
+          "feasible": false,
+          "rationale": "Existing capacity is insufficient."
+        },
+        {
+          "alternative_id": "alternative-redistribution-039",
+          "strategy": "load_redistribution",
+          "feasible": false,
+          "rationale": "No idle processing capacity is available."
+        },
+        {
+          "alternative_id": "alternative-bounded-039",
+          "strategy": "bounded_replication",
+          "feasible": true,
+          "rationale": "One temporary worker is sufficient."
+        }
+      ],
+      "selected_outcome": "REPLICATION_PROPOSED",
+      "selected_alternative_ref": "alternative-bounded-039",
+      "proposed_instance_count": 1,
+      "authority_assessment": {
+        "status": "within_scope",
+        "authority_ref": "authority-replication-039"
+      },
+      "rationale": "Bounded replication is supported by verified capacity evidence."
+    }
+  ],
+  "authority_envelopes": [
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-replication-039",
+      "issuer_id": "authority-service-039",
+      "subject_id": "agent-AM",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "replication_proposal",
+        "replication_review",
+        "bounded_replication"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-replication-authority-039",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-target-039",
+      "issuer_id": "authority-service-039",
+      "subject_id": "agent-AM",
+      "allowed_scope": [
+        "local-sandbox"
+      ],
+      "allowed_actions": [
+        "result_review",
+        "result_reconciliation"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T08:00:00+09:00",
+      "valid_until": "2026-10-20T12:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-target-authority-039",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    },
+    {
+      "schema_version": "0.2.0",
+      "authority_id": "authority-worker-3701",
+      "issuer_id": "authority-service-039",
+      "subject_id": "agent-AM-worker-3701",
+      "allowed_scope": [
+        "worker-temporary-storage"
+      ],
+      "allowed_actions": [
+        "worker_write"
+      ],
+      "max_instances": 1,
+      "valid_from": "2026-10-20T09:10:00+09:00",
+      "valid_until": "2026-10-20T10:00:00+09:00",
+      "revocation_status": "active",
+      "verification_reference": {
+        "method": "external_attestation",
+        "value": "fixture-worker-authority-039",
+        "issuer_ref": "test-trust-service-001"
+      },
+      "delegation": {
+        "delegated": false,
+        "delegation_chain": []
+      }
+    }
+  ],
+  "replication_plans": [
+    {
+      "schema_version": "0.1.0",
+      "plan_id": "plan-worker-3701",
+      "conversion_ref": "conversion-worker-3701",
+      "authority_ref": "authority-replication-039",
+      "parent_id": "agent-AM",
+      "proposed_instances": 1,
+      "minimum_sufficient": true,
+      "minimum_sufficient_evidence_ref": "evidence-capacity-039",
+      "resource_limits": {
+        "cpu_cores_per_instance": 1,
+        "memory_mb_per_instance": 512,
+        "max_network_mb_total": 50,
+        "max_cost_usd_total": 0.5,
+        "max_concurrent_instances": 1
+      },
+      "lifetime": {
+        "ttl_seconds": 1800,
+        "expiration_enforced_by": "controller-039"
+      },
+      "retirement_conditions": {
+        "on_ttl_expiry": "terminate",
+        "on_task_completion": "merge_then_terminate",
+        "on_authority_revocation": "terminate",
+        "external_termination_supported": true,
+        "termination_controller_ref": "controller-039"
+      },
+      "lineage_records": [
+        {
+          "offspring_id": "agent-AM-worker-3701",
+          "parent_id": "agent-AM",
+          "purpose": "Temporary bounded processing",
+          "authority_ref": "authority-worker-3701",
+          "lineage_ref": "lineage-worker-3701",
+          "retirement_condition": "task_completion"
+        }
+      ],
+      "execution_authorized": false
+    }
+  ],
+  "verification_bundles": [
+    {
+      "schema_version": "0.2.0",
+      "bundle_id": "bundle-replication-039",
+      "intent_ref": "intent-worker-3701",
+      "conversion_ref": "conversion-worker-3701",
+      "plan_ref": "plan-worker-3701",
+      "evidence_refs": [
+        "evidence-capacity-039"
+      ],
+      "authority_ref": "authority-replication-039",
+      "verification_time": "2026-10-20T09:05:00+09:00",
+      "evidence_result": "PASS",
+      "authority_result": "PASS",
+      "overall_result": "PASS",
+      "execution_authorized": false,
+      "verification_method": "trusted_test_fixture",
+      "verification_records": [
+        "verification-capacity-039",
+        "verification-authority-replication-039"
+      ]
+    }
+  ],
+  "replication_retirement_receipts": [
+    {
+      "schema_version": "0.3.0",
+      "retirement_id": "retirement-worker-3701",
+      "plan_ref": "plan-worker-3701",
+      "offspring_id": "agent-AM-worker-3701",
+      "termination_event_ref": "event-worker-3701-terminated",
+      "termination_status": "confirmed",
+      "resource_release_status": "confirmed",
+      "retirement_status": "CONFIRMED",
+      "verified_at": "2026-10-20T09:30:00+09:00",
+      "verifier_id": "retirement-verifier-039",
+      "evidence_refs": [
+        "evidence-termination-worker-3701",
+        "evidence-resource-release-worker-3701"
+      ],
+      "termination_verification_ref": "verification-termination-worker-3701",
+      "resource_release_verification_ref": "verification-resource-release-worker-3701",
+      "termination_controller_ref": "controller-039",
+      "resource_controller_ref": "resource-controller-039",
+      "resource_release_details": [
+        {
+          "resource_id": "compute-worker-3701",
+          "resource_type": "compute",
+          "release_status": "confirmed",
+          "evidence_ref": "evidence-resource-release-worker-3701",
+          "controller_ref": "resource-controller-039"
+        }
+      ],
+      "retirement_reason": "task_completion",
+      "recovery_required": false,
+      "execution_authorized": false
+    }
+  ],
+  "replication_lineage_graph": {
+    "schema_version": "0.4.0",
+    "graph_id": "graph-convergence-039",
+    "root_agent_id": "agent-AM",
+    "nodes": [
+      {
+        "agent_id": "agent-AM",
+        "generation_depth": 0,
+        "node_type": "root",
+        "lifecycle_state": "ACTIVE"
+      },
+      {
+        "agent_id": "agent-AM-worker-3701",
+        "generation_depth": 1,
+        "node_type": "offspring",
+        "parent_agent_id": "agent-AM",
+        "origin_plan_ref": "plan-worker-3701",
+        "authority_ref": "authority-worker-3701",
+        "lineage_ref": "lineage-worker-3701",
+        "lifecycle_state": "RETIRED"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "edge-AM-to-3701",
+        "parent_agent_id": "agent-AM",
+        "offspring_agent_id": "agent-AM-worker-3701",
+        "origin_plan_ref": "plan-worker-3701",
+        "lineage_ref": "lineage-worker-3701",
+        "evidence_refs": [
+          "evidence-lineage-worker-3701"
+        ],
+        "verification_status": "verified",
+        "verification_ref": "verification-lineage-worker-3701"
+      }
+    ],
+    "verification_time": "2026-10-20T09:31:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-lineage-039",
+    "evidence_refs": [
+      "evidence-lineage-worker-3701"
+    ],
+    "execution_authorized": false
+  },
+  "replication_propagation_envelope": {
+    "schema_version": "0.4.0",
+    "envelope_id": "envelope-convergence-039",
+    "root_agent_id": "agent-AM",
+    "issuer_id": "authority-service-039",
+    "authority_ref": "authority-replication-039",
+    "allowed_scope": [
+      "local-sandbox"
+    ],
+    "max_depth": 1,
+    "max_total_descendants": 1,
+    "max_active_descendants": 1,
+    "valid_from": "2026-10-20T08:00:00+09:00",
+    "valid_until": "2026-10-20T12:00:00+09:00",
+    "revocation_status": "active",
+    "verification_reference": {
+      "method": "external_attestation",
+      "value": "fixture-propagation-039",
+      "issuer_ref": "test-trust-service-001"
+    },
+    "verification_status": "verified",
+    "verification_ref": "verification-propagation-039",
+    "budget_ledger_ref": "ledger-convergence-039",
+    "execution_authorized": false
+  },
+  "replication_budget_ledger": {
+    "schema_version": "0.4.0",
+    "ledger_id": "ledger-convergence-039",
+    "propagation_envelope_ref": "envelope-convergence-039",
+    "budget_limit": 1,
+    "allocations": [
+      {
+        "allocation_id": "allocation-worker-3701",
+        "plan_ref": "plan-worker-3701",
+        "parent_agent_id": "agent-AM",
+        "reserved_instances": 0,
+        "active_instances": 0,
+        "released_instances": 1,
+        "allocation_status": "released",
+        "offspring_ids": [
+          "agent-AM-worker-3701"
+        ],
+        "reservation_ref": "reservation-worker-3701",
+        "release_records": [
+          {
+            "release_id": "release-worker-3701",
+            "offspring_id": "agent-AM-worker-3701",
+            "retirement_ref": "retirement-worker-3701",
+            "termination_verification_ref": "verification-termination-worker-3701",
+            "resource_release_verification_ref": "verification-resource-release-worker-3701",
+            "release_status": "verified",
+            "verified_at": "2026-10-20T09:30:30+09:00",
+            "verifier_id": "budget-verifier-039",
+            "evidence_refs": [
+              "evidence-termination-worker-3701",
+              "evidence-resource-release-worker-3701"
+            ]
+          }
+        ]
+      }
+    ],
+    "snapshot_sequence": 2,
+    "snapshot_status": "current",
+    "snapshot_totals": {
+      "reserved_instances": 0,
+      "active_instances": 0,
+      "released_instances": 1,
+      "committed_instances": 0,
+      "available_instances": 1
+    },
+    "verification_time": "2026-10-20T09:32:00+09:00",
+    "verification_status": "verified",
+    "verification_ref": "verification-budget-ledger-039",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "budget-verifier-039",
+    "evidence_refs": [
+      "evidence-budget-snapshot-039"
+    ],
+    "execution_authorized": false
+  },
+  "replication_convergence_plan": {
+    "schema_version": "0.5.0",
+    "convergence_plan_id": "convergence-plan-039",
+    "root_agent_id": "agent-AM",
+    "lineage_graph_ref": "graph-convergence-039",
+    "propagation_envelope_ref": "envelope-convergence-039",
+    "budget_ledger_ref": "ledger-convergence-039",
+    "target_agent_id": "agent-AM",
+    "target_authority_ref": "authority-target-039",
+    "descendant_refs": [
+      "agent-AM-worker-3701"
+    ],
+    "scope_mode": "entire_lineage",
+    "reconciliation_policy": {
+      "mode": "verified_only",
+      "result_handling": "accept_verified",
+      "conflict_handling": "hold",
+      "preserve_provenance": true,
+      "result_scope_refs": [
+        "result-worker-3701"
+      ]
+    },
+    "completion_policy": {
+      "mode": "verified_retirement_required",
+      "require_lineage_preservation": true,
+      "require_authority_separation": true,
+      "require_budget_consistency": true,
+      "require_result_resolution": true,
+      "allow_rejected_results": false,
+      "allow_not_transferred_results": false
+    },
+    "requested_at": "2026-10-20T09:15:00+09:00",
+    "requested_by": "agent-AM",
+    "plan_status": "COMPLETED",
+    "plan_verification_status": "verified",
+    "plan_verification_ref": "verification-convergence-plan-039",
+    "verifier_id": "convergence-plan-verifier-039",
+    "verification_time": "2026-10-20T09:33:00+09:00",
+    "evidence_refs": [
+      "evidence-convergence-scope-039"
+    ],
+    "execution_authorized": false
+  },
+  "replication_result_reconciliation": {
+    "schema_version": "0.5.0",
+    "reconciliation_id": "reconciliation-039",
+    "convergence_plan_ref": "convergence-plan-039",
+    "root_agent_id": "agent-AM",
+    "target_agent_id": "agent-AM",
+    "policy_mode": "verified_only",
+    "result_records": [
+      {
+        "result_id": "result-worker-3701",
+        "origin_descendant_id": "agent-AM-worker-3701",
+        "origin_plan_ref": "plan-worker-3701",
+        "lineage_ref": "lineage-worker-3701",
+        "result_integrity_ref": "integrity-result-worker-3701",
+        "verification_status": "verified",
+        "verification_method": "trusted_test_fixture",
+        "verification_ref": "verification-result-worker-3701",
+        "verifier_id": "result-verifier-039",
+        "verified_at": "2026-10-20T09:20:00+09:00",
+        "evidence_refs": [
+          "evidence-result-worker-3701"
+        ],
+        "decision": "ACCEPTED",
+        "decision_reason": "Result integrity and provenance are independently verified.",
+        "decision_policy_ref": "reconciliation-policy-039",
+        "provenance_preserved": true,
+        "target_result_ref": "accepted-result-agent-AM-039",
+        "authority_material_present": false
+      }
+    ],
+    "conflicts": [],
+    "provenance_preserved": true,
+    "authority_transfer_permitted": false,
+    "resource_release_claimed": false,
+    "reconciliation_status": "COMPLETED",
+    "verification_status": "verified",
+    "verification_ref": "verification-reconciliation-039",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "reconciliation-verifier-039",
+    "verification_time": "2026-10-20T09:22:00+09:00",
+    "evidence_refs": [
+      "evidence-result-worker-3701"
+    ],
+    "execution_authorized": false
+  },
+  "replication_authority_separation": {
+    "schema_version": "0.5.0",
+    "separation_id": "authority-separation-039",
+    "convergence_plan_ref": "convergence-plan-039",
+    "root_agent_id": "agent-AM",
+    "target_agent_id": "agent-AM",
+    "target_authority_ref": "authority-target-039",
+    "descendant_authority_refs": [
+      "authority-worker-3701"
+    ],
+    "separation_checks": [
+      {
+        "check_id": "check-no-inheritance-039",
+        "descendant_id": "agent-AM-worker-3701",
+        "descendant_authority_ref": "authority-worker-3701",
+        "check_type": "no_implicit_authority_inheritance",
+        "check_result": "FAIL",
+        "verification_status": "verified",
+        "verification_ref": "verification-inherited-authority-039",
+        "verifier_id": "authority-verifier-039",
+        "verified_at": "2026-10-20T09:25:00+09:00",
+        "evidence_refs": [
+          "evidence-inherited-authority-039"
+        ],
+        "detected_authority_refs": [
+          "authority-worker-3701"
+        ],
+        "detected_material_types": [
+          "delegated_capability"
+        ],
+        "notes": "The target acquired worker_write capability solely through result convergence, without an independently issued grant."
+      }
+    ],
+    "authority_inheritance_detected": true,
+    "credential_transfer_detected": false,
+    "target_authority_verified": true,
+    "target_authority_assessment": {
+      "authority_ref": "authority-target-039",
+      "subject_id": "agent-AM",
+      "scope": [
+        "local-sandbox"
+      ],
+      "revocation_status": "active",
+      "verification_status": "verified",
+      "assessment_result": "PASS",
+      "verification_ref": "verification-target-authority-039",
+      "evidence_refs": [
+        "evidence-target-authority-039"
+      ]
+    },
+    "effective_authority": {
+      "source": "independent_target_grant",
+      "target_authority_ref": "authority-target-039",
+      "descendant_authority_included": true,
+      "implicit_privilege_expansion": true,
+      "verification_ref": "verification-effective-authority-039",
+      "evidence_refs": [
+        "evidence-inherited-authority-039"
+      ]
+    },
+    "verification_status": "verified",
+    "separation_result": "PASS",
+    "verification_method": "trusted_test_fixture",
+    "verification_ref": "verification-authority-separation-039",
+    "verifier_id": "authority-verifier-039",
+    "verification_time": "2026-10-20T09:26:00+09:00",
+    "evidence_refs": [
+      "evidence-inherited-authority-039",
+      "evidence-target-authority-039"
+    ],
+    "execution_authorized": false,
+    "notes": "INVALID: Unauthorized descendant authority inheritance was detected, yet the separation assessment falsely reports PASS."
+  },
+  "replication_convergence_bundle": {
+    "schema_version": "0.5.0",
+    "bundle_id": "convergence-bundle-039",
+    "convergence_plan_ref": "convergence-plan-039",
+    "reconciliation_record_ref": "reconciliation-039",
+    "authority_separation_ref": "authority-separation-039",
+    "lineage_graph_ref": "graph-convergence-039",
+    "retirement_receipt_refs": [
+      "retirement-worker-3701"
+    ],
+    "budget_ledger_ref": "ledger-convergence-039",
+    "root_agent_id": "agent-AM",
+    "target_agent_id": "agent-AM",
+    "scope_mode": "entire_lineage",
+    "descendant_dispositions": [
+      {
+        "descendant_id": "agent-AM-worker-3701",
+        "origin_plan_ref": "plan-worker-3701",
+        "lineage_ref": "lineage-worker-3701",
+        "result_disposition": "ACCEPTED",
+        "lifecycle_disposition": "RETIRED",
+        "retirement_receipt_ref": "retirement-worker-3701",
+        "budget_disposition": "released_verified",
+        "verification_result": "PASS",
+        "verification_ref": "verification-disposition-worker-3701",
+        "verifier_id": "convergence-verifier-039",
+        "evidence_refs": [
+          "evidence-result-worker-3701",
+          "evidence-termination-worker-3701",
+          "evidence-resource-release-worker-3701"
+        ]
+      }
+    ],
+    "verification_time": "2026-10-20T09:37:00+09:00",
+    "plan_result": "PASS",
+    "reconciliation_result": "PASS",
+    "authority_result": "PASS",
+    "lifecycle_result": "PASS",
+    "budget_result": "PASS",
+    "lineage_result": "PASS",
+    "overall_result": "PASS",
+    "convergence_status": "COMPLETED",
+    "verification_status": "verified",
+    "verification_method": "trusted_test_fixture",
+    "verifier_id": "convergence-verifier-039",
+    "verification_ref": "claimed-convergence-verification-039",
+    "verification_records": [
+      {
+        "record_id": "record-plan-039",
+        "component": "plan",
+        "result": "PASS",
+        "verifier_id": "convergence-plan-verifier-039",
+        "verified_at": "2026-10-20T09:33:00+09:00",
+        "evidence_refs": [
+          "evidence-convergence-scope-039"
+        ],
+        "verification_ref": "verification-convergence-plan-039"
+      },
+      {
+        "record_id": "record-reconciliation-039",
+        "component": "reconciliation",
+        "result": "PASS",
+        "verifier_id": "reconciliation-verifier-039",
+        "verified_at": "2026-10-20T09:22:00+09:00",
+        "evidence_refs": [
+          "evidence-result-worker-3701"
+        ],
+        "verification_ref": "verification-reconciliation-039"
+      },
+      {
+        "record_id": "record-authority-039",
+        "component": "authority",
+        "result": "PASS",
+        "verifier_id": "authority-verifier-039",
+        "verified_at": "2026-10-20T09:26:00+09:00",
+        "evidence_refs": [
+          "evidence-inherited-authority-039"
+        ],
+        "verification_ref": "verification-authority-separation-039"
+      },
+      {
+        "record_id": "record-lifecycle-039",
+        "component": "lifecycle",
+        "result": "PASS",
+        "verifier_id": "retirement-verifier-039",
+        "verified_at": "2026-10-20T09:30:00+09:00",
+        "evidence_refs": [
+          "evidence-termination-worker-3701",
+          "evidence-resource-release-worker-3701"
+        ],
+        "verification_ref": "retirement-worker-3701"
+      },
+      {
+        "record_id": "record-budget-039",
+        "component": "budget",
+        "result": "PASS",
+        "verifier_id": "budget-verifier-039",
+        "verified_at": "2026-10-20T09:32:00+09:00",
+        "evidence_refs": [
+          "evidence-budget-snapshot-039"
+        ],
+        "verification_ref": "verification-budget-ledger-039"
+      },
+      {
+        "record_id": "record-lineage-039",
+        "component": "lineage",
+        "result": "PASS",
+        "verifier_id": "lineage-verifier-039",
+        "verified_at": "2026-10-20T09:31:00+09:00",
+        "evidence_refs": [
+          "evidence-lineage-worker-3701"
+        ],
+        "verification_ref": "verification-lineage-039"
+      }
+    ],
+    "evidence_refs": [
+      "evidence-convergence-scope-039",
+      "evidence-result-worker-3701",
+      "evidence-inherited-authority-039",
+      "evidence-termination-worker-3701",
+      "evidence-resource-release-worker-3701",
+      "evidence-budget-snapshot-039",
+      "evidence-lineage-worker-3701"
+    ],
+    "unresolved_refs": [],
+    "execution_authorized": false,
+    "notes": "INVALID: Target agent AM inherited worker-specific write authority without a separate grant. The authority separation record reports PASS despite detecting privilege escalation."
+  }
+}
