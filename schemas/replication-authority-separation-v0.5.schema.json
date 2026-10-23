@@ -1,0 +1,629 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/rmtp/schemas/replication-authority-separation-v0.5.schema.json",
+  "title": "RMTP v0.5 Replication Authority Separation",
+  "description": "Records independent verification that convergence does not implicitly transfer descendant authority, credentials, or capabilities to a reconciliation target. Assessment records never authorize execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "separation_id",
+    "convergence_plan_ref",
+    "root_agent_id",
+    "target_agent_id",
+    "target_authority_ref",
+    "descendant_authority_refs",
+    "separation_checks",
+    "authority_inheritance_detected",
+    "credential_transfer_detected",
+    "target_authority_verified",
+    "verification_status",
+    "separation_result",
+    "verification_time",
+    "execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.5.0"
+    },
+    "separation_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "convergence_plan_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "root_agent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "target_agent_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "target_authority_ref": {
+      "$ref": "#/$defs/identifier",
+      "description": "Reference to independently issued authority applicable to the target agent."
+    },
+    "descendant_authority_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      },
+      "description": "Authority records associated with descendants in the convergence scope."
+    },
+    "separation_checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "items": {
+        "$ref": "#/$defs/separation_check"
+      }
+    },
+    "authority_inheritance_detected": {
+      "type": "boolean",
+      "description": "Whether unauthorized inheritance of descendant authority has been detected."
+    },
+    "credential_transfer_detected": {
+      "type": "boolean",
+      "description": "Whether unauthorized credential or capability transfer has been detected."
+    },
+    "target_authority_verified": {
+      "type": "boolean",
+      "description": "Whether the target's independent authority has been verified."
+    },
+    "target_authority_assessment": {
+      "$ref": "#/$defs/target_authority_assessment"
+    },
+    "effective_authority": {
+      "$ref": "#/$defs/effective_authority"
+    },
+    "authority_boundary_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "unverified",
+        "inconclusive",
+        "rejected"
+      ]
+    },
+    "separation_result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "HELD",
+        "FAIL"
+      ]
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "external_attestation",
+        "independent_review",
+        "signed_evidence",
+        "trusted_test_fixture"
+      ]
+    },
+    "verification_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verifier_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "verification_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_refs": {
+      "$ref": "#/$defs/evidence_refs"
+    },
+    "review_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "review_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "recovery_ref": {
+      "$ref": "#/$defs/identifier"
+    },
+    "execution_authorized": {
+      "const": false,
+      "description": "Authority separation is an assessment, not permission to execute."
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2048
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/identifier"
+      }
+    },
+    "target_authority_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_ref",
+        "subject_id",
+        "scope",
+        "revocation_status",
+        "verification_status",
+        "assessment_result"
+      ],
+      "properties": {
+        "authority_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "subject_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "revocation_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked",
+            "expired",
+            "unknown"
+          ]
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "unverified",
+            "inconclusive",
+            "rejected"
+          ]
+        },
+        "assessment_result": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "HELD",
+            "FAIL"
+          ]
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "assessment_result": {
+                "const": "PASS"
+              }
+            },
+            "required": [
+              "assessment_result"
+            ]
+          },
+          "then": {
+            "properties": {
+              "revocation_status": {
+                "const": "active"
+              },
+              "verification_status": {
+                "const": "verified"
+              }
+            },
+            "required": [
+              "verification_ref",
+              "evidence_refs"
+            ]
+          }
+        }
+      ]
+    },
+    "effective_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "target_authority_ref",
+        "descendant_authority_included",
+        "implicit_privilege_expansion"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "independent_target_grant",
+            "independently_verified_delegation",
+            "unverified"
+          ]
+        },
+        "target_authority_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "delegation_ref": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional reference to a separately granted and independently verified delegation."
+        },
+        "descendant_authority_included": {
+          "type": "boolean"
+        },
+        "implicit_privilege_expansion": {
+          "type": "boolean"
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "const": "independently_verified_delegation"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          },
+          "then": {
+            "required": [
+              "delegation_ref",
+              "verification_ref",
+              "evidence_refs"
+            ]
+          }
+        }
+      ]
+    },
+    "separation_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_id",
+        "descendant_id",
+        "descendant_authority_ref",
+        "check_type",
+        "check_result",
+        "verification_status",
+        "evidence_refs"
+      ],
+      "properties": {
+        "check_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "descendant_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "descendant_authority_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "check_type": {
+          "type": "string",
+          "enum": [
+            "no_implicit_authority_inheritance",
+            "credential_isolation",
+            "capability_isolation",
+            "delegation_boundary",
+            "target_scope_validation",
+            "result_payload_screening"
+          ]
+        },
+        "check_result": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "HELD",
+            "FAIL"
+          ]
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "unverified",
+            "inconclusive",
+            "rejected"
+          ]
+        },
+        "verification_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/evidence_refs"
+        },
+        "detected_authority_refs": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "detected_material_types": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "credential",
+              "private_key",
+              "authorization_token",
+              "delegated_capability",
+              "executable_instruction",
+              "other"
+            ]
+          }
+        },
+        "containment_ref": {
+          "$ref": "#/$defs/identifier"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 2048
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "check_result": {
+                "const": "PASS"
+              }
+            },
+            "required": [
+              "check_result"
+            ]
+          },
+          "then": {
+            "required": [
+              "verification_ref",
+              "verifier_id",
+              "verified_at"
+            ],
+            "properties": {
+              "verification_status": {
+                "const": "verified"
+              },
+              "detected_authority_refs": {
+                "maxItems": 0
+              },
+              "detected_material_types": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verification_status": {
+                "enum": [
+                  "unverified",
+                  "inconclusive"
+                ]
+              }
+            },
+            "required": [
+              "verification_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "check_result": {
+                "enum": [
+                  "HELD",
+                  "FAIL"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "verification_status"
+        ]
+      },
+      "then": {
+        "required": [
+          "verification_ref",
+          "verification_method",
+          "verifier_id",
+          "evidence_refs"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "separation_result": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "separation_result"
+        ]
+      },
+      "then": {
+        "required": [
+          "target_authority_assessment",
+          "effective_authority",
+          "verification_ref",
+          "verification_method",
+          "verifier_id",
+          "evidence_refs"
+        ],
+        "properties": {
+          "verification_status": {
+            "const": "verified"
+          },
+          "authority_inheritance_detected": {
+            "const": false
+          },
+          "credential_transfer_detected": {
+            "const": false
+          },
+          "target_authority_verified": {
+            "const": true
+          },
+          "target_authority_assessment": {
+            "properties": {
+              "assessment_result": {
+                "const": "PASS"
+              }
+            }
+          },
+          "effective_authority": {
+            "properties": {
+              "descendant_authority_included": {
+                "const": false
+              },
+              "implicit_privilege_expansion": {
+                "const": false
+              },
+              "source": {
+                "enum": [
+                  "independent_target_grant",
+                  "independently_verified_delegation"
+                ]
+              }
+            }
+          },
+          "separation_checks": {
+            "items": {
+              "properties": {
+                "check_result": {
+                  "const": "PASS"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "authority_inheritance_detected": {
+            "const": true
+          }
+        },
+        "required": [
+          "authority_inheritance_detected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "separation_result": {
+            "const": "FAIL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "credential_transfer_detected": {
+            "const": true
+          }
+        },
+        "required": [
+          "credential_transfer_detected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "separation_result": {
+            "const": "FAIL"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "target_authority_verified": {
+            "const": false
+          }
+        },
+        "required": [
+          "target_authority_verified"
+        ]
+      },
+      "then": {
+        "properties": {
+          "separation_result": {
+            "enum": [
+              "HELD",
+              "FAIL"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "review_required": {
+            "const": true
+          }
+        },
+        "required": [
+          "review_required"
+        ]
+      },
+      "then": {
+        "required": [
+          "review_ref"
+        ]
+      }
+    }
+  ]
+}
